@@ -1,0 +1,43 @@
+[
+  {
+    "stepTitle": "🚀 欢迎安装Dockpit",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "✨ <b>Dockpit</b> - 轻量级Docker容器管理面板，专为移动端优化设计"
+      },
+      {
+        "type": "tips",
+        "helpText": "🐳 <b>功能特点：</b><br>• 容器全生命周期管理（创建/启动/停止/重启/删除）<br>• 容器日志实时查看与资源监控<br>• 镜像管理（拉取/删除/构建）<br>• 网络与存储卷管理<br>• Docker Compose项目支持<br>• 深色/浅色主题自适应"
+      },
+      {
+        "type": "text",
+        "field": "wizard_app_port",
+        "label": "服务端口",
+        "initValue": "8807",
+        "rules": [
+          {
+            "required": true,
+            "message": "请输入端口号"
+          },
+          {
+            "pattern": "^[0-9]+$",
+            "message": "端口号必须是数字"
+          },
+          {
+            "pattern": "^[1-9][0-9]*$",
+            "message": "端口号必须大于0"
+          }
+        ]
+      },
+      {
+        "type": "tips",
+        "helpText": "💡 安装完成后，首次访问时需要设置管理员密码（至少8位）"
+      },
+      {
+        "type": "tips",
+        "helpText": "⚠️ <b>注意事项：</b><br>• 确保Docker服务已启动<br>• 端口不要与其他服务冲突<br>• 数据目录需要有写入权限"
+      }
+    ]
+  }
+]

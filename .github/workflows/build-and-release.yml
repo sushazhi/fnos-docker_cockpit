@@ -1,0 +1,191 @@
+name: Build and Release Dockpit for fnOS
+
+on:
+  push:
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Dockpit (${{ matrix.arch }})
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        arch: [arm64, amd64]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read version from manifest
+        run: |
+          APP_VERSION=$(grep "^version\s*=" manifest | sed 's/version\s*=\s*//' | tr -d ' ')
+          echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
+          echo "APP_VERSION=${APP_VERSION}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Set Go module proxy
+        run: |
+          go env -w GOPROXY=https://goproxy.cn,direct
+
+      - name: Build Vue frontend
+        run: |
+          cd app/ui
+          npm install
+          npm run build
+
+      - name: Verify Vue build
+        run: |
+          if [ ! -d "app/ui/dist" ]; then
+            echo "ERROR: Vue build output not found"
+            exit 1
+          fi
+          echo "Vue build complete"
+          ls -la app/ui/dist/
+
+      - name: Build Go server (${{ matrix.arch }})
+        run: |
+          cd app/server
+          go mod tidy
+          GOOS=linux GOARCH=${{ matrix.arch }} go build -ldflags "-X dockpit/internal/handler.appVersion=${APP_VERSION}" -o dockpit .
+          echo "Go server built for linux/${{ matrix.arch }}"
+
+      - name: Download fnpack
+        run: |
+          FNPACK_URL="https://static2.fnnas.com/fnpack/fnpack-1.2.1-linux-amd64"
+          wget -q "$FNPACK_URL" -O fnpack
+          chmod +x fnpack
+          echo "fnpack downloaded"
+
+      - name: Verify project structure
+        run: |
+          echo "=== Project structure ==="
+          ls -la
+          echo ""
+          echo "=== Required files ==="
+          for file in manifest ICON.PNG ICON_256.PNG app cmd config wizard; do
+            if [ ! -e "$file" ]; then
+              echo "ERROR: Required file/directory '$file' not found!"
+              exit 1
+            fi
+            echo "  ✓ $file"
+          done
+
+      - name: Create .fpk package
+        run: |
+          mkdir -p build
+          
+          # Copy root files
+          cp -r cmd build/
+          cp -r config build/
+          cp -r wizard build/
+          cp manifest build/
+          cp LICENSE build/
+          cp ICON.PNG build/
+          cp ICON_256.PNG build/
+          
+          # Copy Vue build output
+          mkdir -p build/app/ui
+          cp -r app/ui/dist/* build/app/ui/
+          cp -r app/ui/config build/app/ui/
+          if [ -d "app/ui/images" ]; then cp -r app/ui/images build/app/ui/; fi
+          
+          # Copy Go server binary
+          mkdir -p build/app/server
+          cp app/server/dockpit build/app/server/
+          
+          # Build package
+          cd build
+          ../fnpack build .
+          
+          if [ ! -f "dockpit.fpk" ]; then
+            echo "ERROR: fnpack did not generate dockpit.fpk"
+            exit 1
+          fi
+          
+          PACKAGE_NAME="dockpit-${APP_VERSION}-${{ matrix.arch }}.fpk"
+          mv dockpit.fpk "../${PACKAGE_NAME}"
+          echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
+          echo "Created package: ${PACKAGE_NAME}"
+          ls -lh "../${PACKAGE_NAME}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dockpit-fpk-${{ matrix.arch }}
+          path: ${{ env.PACKAGE_NAME }}
+          retention-days: 30
+
+      - name: Build summary
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          ## ✅ Build Summary (${{ matrix.arch }})
+
+          **Version:** ${{ env.APP_VERSION }}
+
+          **Architecture:** ${{ matrix.arch }}
+
+          **Git Info:**
+          - Commit: \`${{ github.sha }}\`
+          - Branch: \`${{ github.ref_name }}\`
+          - Triggered by: ${{ github.event_name }}
+
+          **Build Artifacts:**
+          - Package: \`${PACKAGE_NAME}\`
+          EOF
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-24.04
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read version from manifest
+        run: |
+          APP_VERSION=$(grep "^version\s*=" manifest | sed 's/version\s*=\s*//' | tr -d ' ')
+          echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          pattern: Dockpit-fpk-*
+
+      - name: List artifacts
+        run: |
+          echo "=== Downloaded artifacts ==="
+          find ./artifacts -name "*.fpk" -type f
+
+      - name: Create Release
+        run: |
+          TAG="${{ github.ref_name }}"
+          CHANGELOG=$(grep "^changelog" manifest | sed 's/changelog\s*=\s*//' | sed 's/<br>/\n/g')
+          
+          # Collect all .fpk files
+          FPK_FILES=$(find ./artifacts -name "*.fpk" -type f | tr '\n' ' ')
+          
+          gh release create "$TAG" \
+            $FPK_FILES \
+            --title "$TAG" \
+            --notes "$CHANGELOG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

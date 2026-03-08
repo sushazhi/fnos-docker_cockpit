@@ -1,0 +1,12 @@
+{
+    "data-share": {
+        "shares": [
+            {
+                "name": "dockpit-data",
+                "permission": {
+                    "rw": ["dockpit"]
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,11 @@
+#!/bin/bash
+PORT="${wizard_app_port:-8807}"
+DATA_DIR="${wizard_data_dir:-/vol1/@appdata/dockpit}"
+
+mkdir -p "$DATA_DIR"
+chmod 755 "$DATA_DIR"
+
+sed -i "s/^PORT=.*/PORT=$PORT/" /etc/dockpit.conf 2>/dev/null || echo "PORT=$PORT" > /etc/dockpit.conf
+sed -i "s|^DPANEL_DATA_DIR=.*|DPANEL_DATA_DIR=$DATA_DIR|" /etc/dockpit.conf 2>/dev/null || echo "DPANEL_DATA_DIR=$DATA_DIR" >> /etc/dockpit.conf
+
+exit 0

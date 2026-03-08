@@ -1,0 +1,31 @@
+[
+  {
+    "stepTitle": "⚙️ 配置设置",
+    "items": [
+      {
+        "type": "text",
+        "field": "wizard_app_port",
+        "label": "服务端口",
+        "initValue": "",
+        "rules": [
+          {
+            "required": true,
+            "message": "请输入端口号"
+          },
+          {
+            "pattern": "^[0-9]+$",
+            "message": "端口号必须是数字"
+          }
+        ]
+      },
+      {
+        "type": "tips",
+        "helpText": "💡 修改端口后需要重启应用才能生效"
+      },
+      {
+        "type": "tips",
+        "helpText": "⚠️ 修改配置不会影响已保存的数据和密码"
+      }
+    ]
+  }
+]

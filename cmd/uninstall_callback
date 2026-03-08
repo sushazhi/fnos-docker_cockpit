@@ -1,0 +1,11 @@
+#!/bin/bash
+DATA_ACTION="${wizard_data_action:-keep}"
+DATA_DIR="${DOCKPIT_DATA_DIR:-/vol1/@appdata/dockpit}"
+
+if [ "$DATA_ACTION" = "delete" ]; then
+    rm -rf "$DATA_DIR"
+fi
+
+rm -f /etc/dockpit.conf
+
+exit 0

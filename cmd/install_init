@@ -1,0 +1,5 @@
+#!/bin/bash
+DATA_DIR="${wizard_data_dir:-/vol1/@appdata/dockpit}"
+mkdir -p "$DATA_DIR"
+chmod 755 "$DATA_DIR"
+exit 0

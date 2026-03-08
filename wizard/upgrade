@@ -1,0 +1,31 @@
+[
+  {
+    "stepTitle": "📦 升级确认",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "即将升级到新版本"
+      },
+      {
+        "type": "tips",
+        "helpText": "⚠️ <b>升级说明：</b><br>- 升级过程中应用将暂时停止<br>- 您的容器和配置不会被影响"
+      },
+      {
+        "type": "radio",
+        "field": "wizard_backup_before_upgrade",
+        "label": "保留配置",
+        "initValue": "yes",
+        "options": [
+          {
+            "label": "是，保留密码和设置",
+            "value": "yes"
+          },
+          {
+            "label": "否，重置所有设置（需重新设置密码）",
+            "value": "no"
+          }
+        ]
+      }
+    ]
+  }
+]

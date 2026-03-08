@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.local-build/
+*.fpk
+*.log
+.env
+.DS_Store
+Thumbs.db
+
+# 编译后的二进制文件
+app/server/dockpit
+app/server/dockpit.exe
+
+# IDE配置文件
+.vscode/

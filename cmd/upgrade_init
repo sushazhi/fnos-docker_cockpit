@@ -1,0 +1,11 @@
+#!/bin/bash
+BACKUP="${wizard_backup_before_upgrade:-true}"
+DATA_DIR="${DPANEL_DATA_DIR:-/vol1/@appdata/dockpit}"
+
+if [ "$BACKUP" = "true" ]; then
+    BACKUP_DIR="/tmp/dockpit_backup_$(date +%Y%m%d_%H%M%S)"
+    mkdir -p "$BACKUP_DIR"
+    cp -r "$DATA_DIR"/* "$BACKUP_DIR/" 2>/dev/null || true
+fi
+
+exit 0

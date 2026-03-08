@@ -1,0 +1,31 @@
+[
+  {
+    "stepTitle": "🗑️ 卸载 Dockpit",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "确定要卸载 Dockpit 吗？"
+      },
+      {
+        "type": "tips",
+        "helpText": "⚠️ <b>卸载说明：</b><br>- 应用程序将被完全移除<br>- 您的 Docker 容器和镜像不会被影响"
+      },
+      {
+        "type": "radio",
+        "field": "wizard_data_action",
+        "label": "数据处理",
+        "initValue": "keep",
+        "options": [
+          {
+            "label": "保留数据 - 保留应用配置",
+            "value": "keep"
+          },
+          {
+            "label": "删除数据 - 同时删除所有配置",
+            "value": "delete"
+          }
+        ]
+      }
+    ]
+  }
+]

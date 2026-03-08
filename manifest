@@ -1,0 +1,24 @@
+appname = dockpit
+version = 1.0.0
+display_name = Dockpit
+desc = <b>Dockpit</b> - 轻量级Docker容器管理面板，专为移动端优化设计。<br><br>🐳 <b>容器管理：</b><br>• 容器全生命周期管理（创建/启动/停止/重启/删除）<br>• 容器日志实时查看<br>• 容器资源监控<br>• 容器文件管理<br><br>📦 <b>镜像管理：</b><br>• 镜像列表查看<br>• 镜像拉取/删除<br>• 镜像详情查看<br><br>🌐 <b>网络与存储：</b><br>• 网络管理<br>• 存储卷管理<br><br>📝 <b>Docker Compose：</b><br>• Compose项目管理<br>• 一键启动/停止<br><br>⚙️ <b>系统功能：</b><br>• Docker信息概览<br>• 系统清理<br>• 审计日志<br><br>🎨 <b>界面特点：</b><br>• 深色/浅色主题自适应<br>• 中英文双语支持<br>• 移动端优先设计<br><br>🐛 <b>问题反馈：</b><a href="https://github.com/donknap/dpanel/issues" target="_blank">GitHub Issues</a>
+
+platform = all
+os_min_version = 1.1.19
+source = thirdparty
+
+maintainer = yukihana
+maintainer_url = https://github.com/sushazhi
+
+distributor = yukihana
+distributor_url = https://github.com/sushazhi/fnos-docker_cockpit
+
+ctl_stop = true
+
+service_port = ${wizard_app_port}
+checkport = true
+
+desktop_uidir = ui
+desktop_applaunchname = dockpit.Application
+
+changelog = v1.0.0<br>• 首次发布<br>• 容器全生命周期管理<br>• 镜像管理功能<br>• 网络与存储卷管理<br>• Docker Compose支持<br>• 移动端优化UI<br>• 中英文双语支持

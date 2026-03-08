@@ -1,0 +1,12 @@
+{
+    ".url": {
+        "dockpit.Application": {
+            "title": "Dockpit",
+            "icon": "images/icon_{0}.png",
+            "type": "iframe",
+            "port": "${wizard_app_port}",
+            "url": "/",
+            "allUsers": true
+        }
+    }
+}
