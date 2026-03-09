@@ -9,14 +9,32 @@
  * 5. 显示更新日志
  */
 
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, type Ref } from 'vue'
+
+// 类型定义
+export interface UpdateInfo {
+  hasUpdate: boolean
+  latestVersion: string
+  releaseUrl: string
+  changelog: string
+}
+
+export interface UseUpdateCheckReturn {
+  updateInfo: Ref<UpdateInfo>
+  showUpdateModal: Ref<boolean>
+  checkUpdate: () => Promise<void>
+  ignoreUpdate: () => void
+  closeUpdateModal: () => void
+  openReleasePage: () => void
+  formatChangelog: (markdown: string) => string
+}
 
 const IGNORE_KEY = 'dockpit_ignore_version'
 const CHECK_TIME_KEY = 'dockpit_update_check_time'
 const CHECK_INTERVAL = 24 * 60 * 60 * 1000 // 24小时检查一次
 
-export function useUpdateCheck(currentVersion = '1.0.0') {
-  const updateInfo = ref({
+export function useUpdateCheck(currentVersion: string = '1.0.0'): UseUpdateCheckReturn {
+  const updateInfo = ref<UpdateInfo>({
     hasUpdate: false,
     latestVersion: '',
     releaseUrl: '',
@@ -25,7 +43,7 @@ export function useUpdateCheck(currentVersion = '1.0.0') {
 
   const showUpdateModal = ref(false)
 
-  function getIgnoredVersion() {
+  function getIgnoredVersion(): string {
     try {
       return localStorage.getItem(IGNORE_KEY) || ''
     } catch (e) {
@@ -33,13 +51,15 @@ export function useUpdateCheck(currentVersion = '1.0.0') {
     }
   }
 
-  function setIgnoredVersion(version) {
+  function setIgnoredVersion(version: string) {
     try {
       localStorage.setItem(IGNORE_KEY, version)
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
   }
 
-  function getLastCheckTime() {
+  function getLastCheckTime(): number {
     try {
       const time = localStorage.getItem(CHECK_TIME_KEY)
       return time ? parseInt(time, 10) : 0
@@ -51,15 +71,17 @@ export function useUpdateCheck(currentVersion = '1.0.0') {
   function setCheckTime() {
     try {
       localStorage.setItem(CHECK_TIME_KEY, Date.now().toString())
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
   }
 
-  function shouldCheckUpdate() {
+  function shouldCheckUpdate(): boolean {
     const lastCheck = getLastCheckTime()
     return Date.now() - lastCheck >= CHECK_INTERVAL
   }
 
-  function compareVersions(current, latest) {
+  function compareVersions(current: string, latest: string): number {
     const cur = (current || '').split('.').map(n => parseInt(n, 10) || 0)
     const lat = (latest || '').split('.').map(n => parseInt(n, 10) || 0)
     
@@ -72,6 +94,12 @@ export function useUpdateCheck(currentVersion = '1.0.0') {
     if (lat.length > cur.length) return 1
     if (cur.length > lat.length) return -1
     return 0
+  }
+
+  interface GitHubReleaseResponse {
+    tag_name?: string
+    html_url?: string
+    body?: string
   }
 
   async function checkUpdate() {
@@ -89,7 +117,7 @@ export function useUpdateCheck(currentVersion = '1.0.0') {
 
       if (!response.ok) throw new Error('HTTP ' + response.status)
 
-      const data = await response.json()
+      const data: GitHubReleaseResponse = await response.json()
       const latestVersion = (data.tag_name || '').replace(/^v/, '')
 
       // 更新检查时间
@@ -117,7 +145,7 @@ export function useUpdateCheck(currentVersion = '1.0.0') {
         console.log('[Dockpit] 当前已是最新版本')
       }
     } catch (error) {
-      console.error('[Dockpit] 检查更新失败:', error.message)
+      console.error('[Dockpit] 检查更新失败:', error instanceof Error ? error.message : 'Unknown error')
     }
   }
 
@@ -139,12 +167,12 @@ export function useUpdateCheck(currentVersion = '1.0.0') {
   }
 
   // 格式化更新日志
-  function formatChangelog(markdown) {
+  function formatChangelog(markdown: string): string {
     if (!markdown) return ''
     let text = markdown.substring(0, 500)
-    text = text.split('\n').filter(line => line.trim().length > 0)
-    text = text.map(line => line.replace(/^-\s*/, '• '))
-    return text.join('\n')
+    const lines = text.split('\n').filter(line => line.trim().length > 0)
+    const formatted = lines.map(line => line.replace(/^-\s*/, '• '))
+    return formatted.join('\n')
   }
 
   // 自动检查更新（延迟3秒，避免影响页面加载）

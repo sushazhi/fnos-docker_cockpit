@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const composeProjectLabel = "com.docker.compose.project"
+
 type VolumeHandler struct {
 	service *docker.VolumeService
 }
@@ -28,17 +30,14 @@ func (h *VolumeHandler) List(c *gin.Context) {
 		return
 	}
 
-	// 获取所有容器（包括停止的）
 	containerService := docker.NewContainerService()
 	containers, err := containerService.List(ctx, true)
 	if err != nil {
-		// 如果获取容器失败，仍然返回存储卷列表
 		response.Success(c, gin.H{"volumes": result.Volumes})
 		return
 	}
 
-	// 构建存储卷使用情况映射
-	volumeUsage := make(map[string][]string) // volumeName -> []containerNames
+	volumeUsage := make(map[string][]string)
 	for _, cont := range containers {
 		for _, mount := range cont.Mounts {
 			if mount.Type == "volume" && mount.Name != "" {
@@ -51,20 +50,27 @@ func (h *VolumeHandler) List(c *gin.Context) {
 		}
 	}
 
-	// 为每个存储卷添加实际使用信息
 	type VolumeWithUsage struct {
 		*volume.Volume
 		Containers []string `json:"containers,omitempty"`
 		Used       bool     `json:"used"`
+		Project    string   `json:"project,omitempty"`
 	}
 
 	volumesWithUsage := make([]VolumeWithUsage, 0, len(result.Volumes))
 	for _, vol := range result.Volumes {
-		containers, used := volumeUsage[vol.Name]
+		containerNames, hasContainer := volumeUsage[vol.Name]
+		projectName := ""
+		if vol.Labels != nil {
+			projectName = vol.Labels[composeProjectLabel]
+		}
+		used := hasContainer || projectName != ""
+
 		volumesWithUsage = append(volumesWithUsage, VolumeWithUsage{
 			Volume:     vol,
-			Containers: containers,
+			Containers: containerNames,
 			Used:       used,
+			Project:    projectName,
 		})
 	}
 

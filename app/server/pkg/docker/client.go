@@ -247,8 +247,8 @@ func (s *ImageService) History(ctx context.Context, id string) ([]image.HistoryR
 	return cli.ImageHistory(ctx, id)
 }
 
-func (s *ImageService) CheckUpdate(ctx context.Context, imageName string) (bool, string, error) {
-	inspect, _, err := cli.ImageInspectWithRaw(ctx, imageName)
+func (s *ImageService) CheckUpdate(ctx context.Context, localImage, remoteImage string) (bool, string, error) {
+	inspect, _, err := cli.ImageInspectWithRaw(ctx, localImage)
 	if err != nil {
 		return false, "", err
 	}
@@ -265,7 +265,7 @@ func (s *ImageService) CheckUpdate(ctx context.Context, imageName string) (bool,
 	repo := parts[0]
 	localDigestHash := parts[1]
 
-	pullReader, err := cli.ImagePull(ctx, imageName, image.PullOptions{})
+	pullReader, err := cli.ImagePull(ctx, remoteImage, image.PullOptions{})
 	if err != nil {
 		return false, "", err
 	}
@@ -273,7 +273,7 @@ func (s *ImageService) CheckUpdate(ctx context.Context, imageName string) (bool,
 
 	io.ReadAll(pullReader)
 
-	updatedInspect, _, err := cli.ImageInspectWithRaw(ctx, imageName)
+	updatedInspect, _, err := cli.ImageInspectWithRaw(ctx, localImage)
 	if err != nil {
 		return false, "", err
 	}

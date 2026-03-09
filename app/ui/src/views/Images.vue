@@ -360,6 +360,15 @@ async function refresh() {
 }
 
 async function checkUpdates() {
+  try {
+    const checkData = await api.get('/api/image/search/check')
+    if (!checkData.available) {
+      return
+    }
+  } catch (e) {
+    return
+  }
+  
   for (const img of images.value) {
     if (img.RepoTags && img.RepoTags[0] && img.RepoTags[0] !== '<none>:<none>') {
       try {

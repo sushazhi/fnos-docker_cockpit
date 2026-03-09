@@ -1,10 +1,16 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory, type RouterOptions } from 'vue-router'
 import App from './App.vue'
 import i18n from './i18n'
 import './styles/main.css'
 
-const routes = [
+interface RouteConfig {
+  path: string
+  name: string
+  component: () => Promise<typeof import('*.vue')>
+}
+
+const routes: RouteConfig[] = [
   { path: '/', name: 'home', component: () => import('./views/Home.vue') },
   { path: '/containers', name: 'containers', component: () => import('./views/Containers.vue') },
   { path: '/container/:id', name: 'container', component: () => import('./views/ContainerDetail.vue') },
@@ -17,10 +23,12 @@ const routes = [
   { path: '/settings', name: 'settings', component: () => import('./views/Settings.vue') }
 ]
 
-const router = createRouter({
+const routerOptions: RouterOptions = {
   history: createWebHashHistory(),
   routes
-})
+}
+
+const router = createRouter(routerOptions)
 
 const app = createApp(App)
 app.use(router)

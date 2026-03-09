@@ -449,7 +449,7 @@ func (h *ImageHandler) History(c *gin.Context) {
 }
 
 func (h *ImageHandler) CheckUpdate(c *gin.Context) {
-	ctx, cancel := docker.ContextWithTimeout(2 * 60 * 1000 * 1000000)
+	ctx, cancel := docker.ContextWithTimeout(3 * 60 * 1000 * 1000000)
 	defer cancel()
 
 	id := c.Param("id")
@@ -460,31 +460,35 @@ func (h *ImageHandler) CheckUpdate(c *gin.Context) {
 		return
 	}
 
-	imageName := ""
+	localImage := ""
 	if len(inspect.RepoTags) > 0 && inspect.RepoTags[0] != "<none>:<none>" {
-		imageName = inspect.RepoTags[0]
+		localImage = inspect.RepoTags[0]
 	} else if len(inspect.RepoDigests) > 0 {
 		parts := strings.SplitN(inspect.RepoDigests[0], "@", 2)
 		if len(parts) > 0 {
-			imageName = parts[0] + ":latest"
+			localImage = parts[0] + ":latest"
 		}
 	}
 
-	if imageName == "" {
+	if localImage == "" {
 		response.Success(c, gin.H{"hasUpdate": false, "message": "无法确定镜像名称"})
 		return
 	}
 
-	hasUpdate, newDigest, err := h.service.CheckUpdate(ctx, imageName)
+	hasUpdate, newDigest, err := h.service.CheckUpdate(ctx, localImage, localImage)
 	if err != nil {
-		response.DockerError(c, "检查更新失败", err.Error())
+		response.Success(c, gin.H{
+			"hasUpdate":  false,
+			"error":      err.Error(),
+			"localImage": localImage,
+		})
 		return
 	}
 
 	response.Success(c, gin.H{
-		"hasUpdate": hasUpdate,
-		"newDigest": newDigest,
-		"image":     imageName,
+		"hasUpdate":  hasUpdate,
+		"newDigest":  newDigest,
+		"localImage": localImage,
 	})
 }
 
