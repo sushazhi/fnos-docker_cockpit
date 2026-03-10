@@ -375,6 +375,20 @@ export default {
     passwordChanged: 'Password changed successfully',
     passwordFailed: 'Change failed'
   },
+  setup: {
+    title: 'First Login Setup',
+    desc: 'Welcome to Dockpit, please set up your login information',
+    username: 'Username',
+    password: 'Password',
+    confirmPassword: 'Confirm Password',
+    setting: 'Setting up...',
+    submit: 'Submit',
+    passwordMin: 'Password must be at least 8 characters',
+    passwordMismatch: 'Passwords do not match',
+    passwordMatch: 'Passwords match',
+    required: 'Please fill in all required fields',
+    failed: 'Setup failed'
+  },
   appearance: {
     title: 'Appearance',
     desc: 'Theme & display settings',

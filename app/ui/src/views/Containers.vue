@@ -7,7 +7,7 @@
         </svg>
       </button>
       <span class="header-title">{{ t('containers.title') }}</span>
-      <button class="header-action" @click="refresh">
+      <button class="header-action" @click="refresh(true)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"/>
           <polyline points="1 20 1 14 7 14"/>
@@ -125,15 +125,19 @@ function getStatusText(state) {
   return t(`containers.state.${state}`) || state
 }
 
-async function refresh() {
-  loading.value = true
+async function refresh(showLoading = true) {
+  if (showLoading) {
+    loading.value = true
+  }
   try {
     const data = await api.get('/api/containers')
     containers.value = data.containers || []
   } catch (e) {
     console.error('Failed to load containers:', e)
   } finally {
-    loading.value = false
+    if (showLoading) {
+      loading.value = false
+    }
   }
 }
 

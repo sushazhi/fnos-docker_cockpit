@@ -137,14 +137,20 @@
               </svg>
             </div>
             <div class="item-content">
-              <div class="item-title">{{ getContainerName(c) }}</div>
-              <div class="item-subtitle">{{ c.Image }}</div>
-              <div class="item-stats" v-if="containerStats[c.Id]">
-                <span class="stat-tag cpu">{{ t('home.cpu') }}: {{ containerStats[c.Id].CPUPerc || '-' }}</span>
-                <span class="stat-tag mem">{{ t('home.mem') }}: {{ formatMemory(containerStats[c.Id].MemUsage) }}</span>
-                <span class="stat-tag net" v-if="containerStats[c.Id].NetIORate && containerStats[c.Id].NetIORate !== '-'">{{ containerStats[c.Id].NetIORate }}</span>
+                <div class="item-title">{{ getContainerName(c) }}</div>
+                <div class="item-subtitle">{{ c.Image }}</div>
+                <div class="item-stats" v-if="containerStats[c.Id]">
+                  <span class="stat-tag cpu">{{ t('home.cpu') }}: {{ containerStats[c.Id].CPUPerc || '-' }}</span>
+                  <span class="stat-tag mem">{{ t('home.mem') }}: {{ formatMemory(containerStats[c.Id].MemUsage) }}</span>
+                  <span class="stat-tag net" v-if="containerStats[c.Id].NetIORate && containerStats[c.Id].NetIORate !== '-'">{{ containerStats[c.Id].NetIORate }}</span>
+                  <!-- 端口映射显示 -->
+                  <div class="item-ports" v-if="getUniquePorts(c).length > 0">
+                    <div class="port-item" v-for="port in getUniquePorts(c)" :key="port.PrivatePort">
+                      <span class="port-text" @click="openPortInNewTab(port.PublicPort)">{{ port.PublicPort }}:{{ port.PrivatePort }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
             <span class="badge badge-success">{{ t('containers.state.running') }}</span>
           </div>
           <div class="more-link" @click="$router.push('/containers')">
@@ -263,12 +269,32 @@ function getContainerName(c) {
   return c.Id?.substring(0, 12) || 'unknown'
 }
 
+// 获取去重后的端口列表（处理 IPv4/IPv6 重复绑定的情况）
+function getUniquePorts(c) {
+  if (!c.Ports || c.Ports.length === 0) return []
+
+  const seen = new Set()
+  return c.Ports.filter(port => {
+    if (!port.PublicPort) return false
+    const key = `${port.PublicPort}:${port.PrivatePort}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 // 格式化内存显示，只显示使用量部分
 function formatMemory(memUsage) {
   if (!memUsage) return '-'
   // MemUsage 格式为 "50MiB / 1GiB"，只取第一部分
   const parts = memUsage.split(' / ')
   return parts[0] || memUsage
+}
+
+// 在新标签页打开端口
+function openPortInNewTab(port) {
+  const host = window.location.hostname
+  window.open(`http://${host}:${port}`, '_blank')
 }
 
 async function loadContainerStats() {
@@ -611,6 +637,36 @@ onUnmounted(() => {
 .stat-tag.net {
   background: rgba(255, 193, 7, 0.1);
   color: #ffc107;
+}
+
+/* 端口映射样式 */
+.item-ports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0;
+}
+
+.port-item {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'HarmonyOS Sans SC', 'SF Mono', 'Consolas', monospace;
+}
+
+.port-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: #667eea;
+  cursor: pointer;
+  font-family: 'HarmonyOS Sans SC', 'SF Mono', 'Consolas', monospace;
+}
+
+.port-text:hover {
+  text-decoration: underline;
 }
 
 .more-link {

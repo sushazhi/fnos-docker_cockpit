@@ -87,6 +87,8 @@ func main() {
 		api.GET("/image/:id/history", images.History)
 		api.GET("/image/:id/check-update", images.CheckUpdate)
 		api.POST("/image/:id/update", middleware.CSRFRequired(), images.Update)
+		api.POST("/image/:id/edit-tags", middleware.CSRFRequired(), images.EditTags)
+		api.GET("/image/:id/detect-upgrade", images.DetectUpgrade)
 		api.POST("/image/pull", middleware.CSRFRequired(), images.Pull)
 		api.GET("/image/pull-stream", middleware.CSRFRequired(), images.PullStream)
 		api.POST("/image/push", middleware.CSRFRequired(), images.Push)
@@ -94,6 +96,7 @@ func main() {
 		api.POST("/image/tag", middleware.CSRFRequired(), images.Tag)
 		api.GET("/image/search/check", images.CheckSearchAvailable)
 		api.GET("/image/search", images.Search)
+		api.GET("/image/tags", images.GetTags)
 		api.POST("/image/prune", middleware.CSRFRequired(), images.Prune)
 		api.POST("/image/build", middleware.CSRFRequired(), images.Build)
 

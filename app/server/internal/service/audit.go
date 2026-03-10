@@ -2,6 +2,7 @@ package service
 
 import (
 	"bufio"
+	"crypto/rand"
 	"encoding/json"
 	"os"
 	"sync"
@@ -108,8 +109,9 @@ func generateLogID() string {
 func randomString(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, n)
+	rand.Read(b)
 	for i := range b {
-		b[i] = letters[time.Now().Nanosecond()%len(letters)]
+		b[i] = letters[int(b[i])%len(letters)]
 	}
 	return string(b)
 }

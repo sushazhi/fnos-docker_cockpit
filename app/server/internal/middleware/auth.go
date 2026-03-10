@@ -5,6 +5,7 @@ import (
 	"dockpit/internal/service"
 	"dockpit/pkg/response"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -326,6 +327,7 @@ func CORS() gin.HandlerFunc {
 			allowedOrigins = strings.Split(envOrigins, ",")
 		} else {
 			// 开发模式：允许 localhost（仅在未配置 ALLOWED_ORIGINS 时）
+			log.Println("[警告] 未配置 ALLOWED_ORIGINS 环境变量，使用开发模式 CORS 设置。生产环境请配置 ALLOWED_ORIGINS")
 			allowedOrigins = []string{
 				"http://localhost:3000",
 				"http://localhost:8807",

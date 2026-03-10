@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -19,8 +21,8 @@ import (
 )
 
 type ImageHandler struct {
-	service       *docker.ImageService
-	containerSrv  *docker.ContainerService
+	service      *docker.ImageService
+	containerSrv *docker.ContainerService
 }
 
 func NewImageHandler() *ImageHandler {
@@ -126,6 +128,60 @@ func normalizeRegistry(registry string) string {
 	return registry
 }
 
+// isValidImageName 验证镜像名称是否合法
+func isValidImageName(name string) bool {
+	if name == "" || len(name) > 256 {
+		return false
+	}
+	// 只允许字母、数字、-、_、/、.
+	for _, c := range name {
+		if !((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ||
+			c == '-' || c == '_' || c == '/' || c == '.') {
+			return false
+		}
+	}
+	// 不能以 . 或 - 开头
+	if strings.HasPrefix(name, ".") || strings.HasPrefix(name, "-") {
+		return false
+	}
+	return true
+}
+
+// isValidSearchTerm 验证搜索关键词是否合法
+func isValidSearchTerm(term string) bool {
+	if term == "" || len(term) > 128 {
+		return false
+	}
+	// 只允许字母、数字、-、_、/、.、空格
+	for _, c := range term {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') || c == '-' || c == '_' ||
+			c == '/' || c == '.' || c == ' ') {
+			return false
+		}
+	}
+	return true
+}
+
+// isValidRegistry 验证加速源地址是否合法
+func isValidRegistry(registry string) bool {
+	if registry == "" || len(registry) > 256 {
+		return false
+	}
+	// 只允许字母、数字、-、_、.、:
+	for _, c := range registry {
+		if !((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ||
+			c == '-' || c == '_' || c == '.' || c == ':') {
+			return false
+		}
+	}
+	// 必须包含至少一个点（域名格式）
+	if !strings.Contains(registry, ".") {
+		return false
+	}
+	return true
+}
+
 func (h *ImageHandler) Pull(c *gin.Context) {
 	ctx, cancel := docker.ContextWithTimeout(10 * 60 * 1000 * 1000000)
 	defer cancel()
@@ -136,10 +192,11 @@ func (h *ImageHandler) Pull(c *gin.Context) {
 		return
 	}
 
-	// 规范化镜像名称
-	imageName := normalizeImageName(req.Image)
+	// 规范化镜像名称（原始名称，不带加速源）
+	originalImageName := normalizeImageName(req.Image)
 
 	// 如果配置了镜像加速源,修改镜像名称
+	imageName := originalImageName
 	if req.Registry != "" {
 		// 解析镜像名称，分离仓库地址、镜像名和标签
 		// 镜像名称格式: [registry/][namespace/]name[:tag]
@@ -175,6 +232,23 @@ func (h *ImageHandler) Pull(c *gin.Context) {
 		return
 	}
 
+	// 如果使用了加速源，给镜像添加一个不带加速源的标签
+	if req.Registry != "" {
+		// 从拉取的镜像名称中提取镜像ID或标签
+		// 尝试使用原始镜像名称（不带加速源）作为新标签
+		cleanTag := originalImageName
+		// 移除默认仓库前缀
+		cleanTag = strings.TrimPrefix(cleanTag, "docker.io/")
+		cleanTag = strings.TrimPrefix(cleanTag, "library/")
+
+		// 给拉取的镜像添加纯净标签
+		if err := h.service.Tag(ctx, imageName, cleanTag); err != nil {
+			log.Printf("[镜像拉取] 添加纯净标签失败 %s -> %s: %v", imageName, cleanTag, err)
+		} else {
+			log.Printf("[镜像拉取] 成功添加纯净标签: %s", cleanTag)
+		}
+	}
+
 	addAuditLog(c, "image_pull", map[string]interface{}{"image": req.Image, "registry": req.Registry})
 	response.Success(c, gin.H{"success": true, "output": outputStr})
 }
@@ -186,19 +260,20 @@ func (h *ImageHandler) PullStream(c *gin.Context) {
 
 	// 从 URL 参数获取镜像名称和加速源
 	imageNameParam := c.Query("image")
-	registry := c.Query("registry")
+	registryParam := c.Query("registry")
 
 	if imageNameParam == "" {
 		response.BadRequest(c, "镜像名称不能为空")
 		return
 	}
 
-	// 规范化镜像名称
-	imageName := normalizeImageName(imageNameParam)
+	// 规范化镜像名称（原始名称，不带加速源）
+	originalImageName := normalizeImageName(imageNameParam)
 
 	// 如果配置了镜像加速源,修改镜像名称
-	if registry != "" {
-		registry = normalizeRegistry(registry)
+	imageName := originalImageName
+	if registryParam != "" {
+		registry := normalizeRegistry(registryParam)
 		imageName = registry + "/" + imageName
 	}
 
@@ -229,6 +304,22 @@ func (h *ImageHandler) PullStream(c *gin.Context) {
 	if err := scanner.Err(); err != nil {
 		c.SSEvent("error", gin.H{"message": err.Error()})
 		return
+	}
+
+	// 如果使用了加速源，给镜像添加一个不带加速源的标签
+	if registryParam != "" {
+		// 尝试使用原始镜像名称（不带加速源）作为新标签
+		cleanTag := originalImageName
+		// 移除默认仓库前缀
+		cleanTag = strings.TrimPrefix(cleanTag, "docker.io/")
+		cleanTag = strings.TrimPrefix(cleanTag, "library/")
+
+		// 给拉取的镜像添加纯净标签
+		if err := h.service.Tag(ctx, imageName, cleanTag); err != nil {
+			log.Printf("[镜像拉取] 添加纯净标签失败 %s -> %s: %v", imageName, cleanTag, err)
+		} else {
+			log.Printf("[镜像拉取] 成功添加纯净标签: %s", cleanTag)
+		}
 	}
 
 	c.SSEvent("complete", gin.H{"message": "拉取完成"})
@@ -329,9 +420,59 @@ func (h *ImageHandler) Search(c *gin.Context) {
 		return
 	}
 
+	// 安全验证：验证搜索关键词
+	if !isValidSearchTerm(term) {
+		response.BadRequest(c, "无效的搜索关键词")
+		return
+	}
+
+	registry := c.Query("registry") // 从 URL 参数获取加速源
 	limit := parseInt(c.Query("limit"), 25)
 
-	// 只使用官方Docker Hub API
+	// 限制最大搜索数量
+	if limit > 100 {
+		limit = 100
+	}
+
+	// 如果配置了加速源，使用 Docker SDK 搜索（支持加速源）
+	if registry != "" {
+		registry = normalizeRegistry(registry)
+		// 安全验证：验证加速源地址
+		if !isValidRegistry(registry) {
+			response.BadRequest(c, "无效的加速源地址")
+			return
+		}
+		// 构建带加速源的搜索词，如: docker.1ms.run/nginx
+		searchTerm := registry + "/" + term
+
+		ctx, cancel := docker.ContextWithTimeout(30 * 1000 * 1000000)
+		defer cancel()
+
+		results, err := h.service.Search(ctx, searchTerm, types.ImageSearchOptions{Limit: limit})
+		if err != nil {
+			log.Printf("[镜像搜索] Docker SDK 搜索失败: %v", err)
+			response.DockerError(c, "搜索镜像失败", "搜索服务暂时不可用")
+			return
+		}
+
+		// 转换结果格式
+		var searchResults []map[string]interface{}
+		for _, r := range results {
+			// 返回带加速源前缀的完整名称，方便用户直接拉取
+			fullName := registry + "/" + r.Name
+			searchResults = append(searchResults, map[string]interface{}{
+				"name":        fullName,
+				"description": r.Description,
+				"star_count":  r.StarCount,
+				"is_official": r.IsOfficial,
+			})
+		}
+
+		response.Success(c, gin.H{"results": searchResults})
+		return
+	}
+
+	// 没有配置加速源，使用 Docker Hub API
 	client := &http.Client{Timeout: 10 * 1000000000} // 10秒超时
 	apiURL := "https://registry.hub.docker.com/v2/repositories/search/?query=" + url.QueryEscape(term) + "&page_size=" + strconv.Itoa(limit)
 
@@ -345,9 +486,8 @@ func (h *ImageHandler) Search(c *gin.Context) {
 
 	// 检查响应状态码
 	if resp.StatusCode != 200 {
-		body, _ := io.ReadAll(resp.Body)
-		log.Printf("[镜像搜索] HTTP错误 %d: %s", resp.StatusCode, string(body))
-		response.DockerError(c, "搜索镜像失败", fmt.Sprintf("HTTP %d: %s", resp.StatusCode, string(body)))
+		log.Printf("[镜像搜索] HTTP错误 %d", resp.StatusCode)
+		response.DockerError(c, "搜索镜像失败", fmt.Sprintf("HTTP %d", resp.StatusCode))
 		return
 	}
 
@@ -453,6 +593,7 @@ func (h *ImageHandler) CheckUpdate(c *gin.Context) {
 	defer cancel()
 
 	id := c.Param("id")
+	registry := c.Query("registry") // 从 URL 参数获取加速源
 
 	inspect, err := h.service.Inspect(ctx, id)
 	if err != nil {
@@ -475,7 +616,22 @@ func (h *ImageHandler) CheckUpdate(c *gin.Context) {
 		return
 	}
 
-	hasUpdate, newDigest, err := h.service.CheckUpdate(ctx, localImage, localImage)
+	// 如果配置了加速源，构建带加速源的远程镜像名
+	remoteImage := localImage
+	if registry != "" {
+		registry = normalizeRegistry(registry)
+		// 移除默认仓库前缀
+		imageName := strings.TrimPrefix(localImage, "docker.io/")
+		imageName = strings.TrimPrefix(imageName, "library/")
+		// 检查是否已包含自定义仓库
+		parts := strings.Split(imageName, "/")
+		if len(parts) > 1 && (strings.Contains(parts[0], ".") || strings.Contains(parts[0], ":")) {
+			imageName = strings.Join(parts[1:], "/")
+		}
+		remoteImage = registry + "/" + imageName
+	}
+
+	hasUpdate, newDigest, err := h.service.CheckUpdate(ctx, localImage, remoteImage)
 	if err != nil {
 		response.Success(c, gin.H{
 			"hasUpdate":  false,
@@ -498,6 +654,12 @@ func (h *ImageHandler) Update(c *gin.Context) {
 
 	id := c.Param("id")
 
+	// 从请求体获取加速源参数
+	var req struct {
+		Registry string `json:"registry"`
+	}
+	c.ShouldBindJSON(&req)
+
 	inspect, err := h.service.Inspect(ctx, id)
 	if err != nil {
 		response.DockerError(c, "获取镜像信息失败", err.Error())
@@ -519,14 +681,164 @@ func (h *ImageHandler) Update(c *gin.Context) {
 		return
 	}
 
-	output, err := h.service.Pull(ctx, imageName, image.PullOptions{})
+	// 如果配置了加速源，构建带加速源的镜像名
+	pullImage := imageName
+	if req.Registry != "" {
+		registry := normalizeRegistry(req.Registry)
+		// 移除默认仓库前缀
+		cleanImage := strings.TrimPrefix(imageName, "docker.io/")
+		cleanImage = strings.TrimPrefix(cleanImage, "library/")
+		// 检查是否已包含自定义仓库
+		parts := strings.Split(cleanImage, "/")
+		if len(parts) > 1 && (strings.Contains(parts[0], ".") || strings.Contains(parts[0], ":")) {
+			cleanImage = strings.Join(parts[1:], "/")
+		}
+		pullImage = registry + "/" + cleanImage
+	}
+
+	output, err := h.service.Pull(ctx, pullImage, image.PullOptions{})
 	if err != nil {
 		response.DockerError(c, "更新镜像失败", err.Error())
 		return
 	}
 
-	addAuditLog(c, "image_update", map[string]interface{}{"image": imageName})
+	addAuditLog(c, "image_update", map[string]interface{}{"image": imageName, "registry": req.Registry})
 	response.Success(c, gin.H{"success": true, "output": string(output), "image": imageName})
+}
+
+// GetTags 获取镜像的所有标签
+func (h *ImageHandler) GetTags(c *gin.Context) {
+	imageName := c.Query("image")
+	if imageName == "" {
+		response.BadRequest(c, "请输入镜像名称")
+		return
+	}
+
+	// 移除可能存在的标签部分
+	if idx := strings.LastIndex(imageName, ":"); idx > strings.LastIndex(imageName, "/") {
+		imageName = imageName[:idx]
+	}
+
+	// 移除加速源前缀（如果有）
+	registry := c.Query("registry")
+	if registry != "" {
+		registry = normalizeRegistry(registry)
+		// 如果镜像名包含加速源前缀，移除它
+		imageName = strings.TrimPrefix(imageName, registry+"/")
+	}
+
+	// 如果镜像名还包含域名前缀（如 docker.1ms.run/nginx），移除它
+	// Docker Hub 官方镜像格式: library/nginx 或 nginx
+	// 第三方镜像格式: user/image
+	if strings.Contains(imageName, "/") {
+		parts := strings.Split(imageName, "/")
+		// 如果第一部分看起来像域名（包含 . 或 :），移除它
+		if len(parts) > 1 && (strings.Contains(parts[0], ".") || strings.Contains(parts[0], ":")) {
+			imageName = strings.Join(parts[1:], "/")
+		}
+	}
+
+	// 安全验证：只允许合法的镜像名字符（字母、数字、-、_、/、.）
+	if !isValidImageName(imageName) {
+		response.BadRequest(c, "无效的镜像名称")
+		return
+	}
+
+	// 优先使用加速源获取标签
+	if registry != "" {
+		// 通过加速源的 Registry API 获取标签
+		tags, err := h.getTagsFromRegistry(registry, imageName)
+		if err == nil && len(tags) > 0 {
+			response.Success(c, gin.H{"tags": tags})
+			return
+		}
+		log.Printf("[镜像标签] 从加速源获取失败: %v，尝试 Docker Hub", err)
+	}
+
+	// 尝试 Docker Hub API
+	client := &http.Client{Timeout: 10 * 1000000000}
+	apiURL := "https://registry.hub.docker.com/v2/repositories/" + url.PathEscape(imageName) + "/tags/?page_size=50"
+
+	resp, err := client.Get(apiURL)
+	if err != nil {
+		log.Printf("[镜像标签] 获取失败: %v", err)
+		response.DockerError(c, "获取镜像标签失败", "网络连接错误")
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Printf("[镜像标签] HTTP错误 %d", resp.StatusCode)
+		response.DockerError(c, "获取镜像标签失败", fmt.Sprintf("HTTP %d", resp.StatusCode))
+		return
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		response.DockerError(c, "读取响应失败", err.Error())
+		return
+	}
+
+	// 解析响应
+	var tagsResp struct {
+		Results []struct {
+			Name string `json:"name"`
+		} `json:"results"`
+	}
+
+	if err := json.Unmarshal(body, &tagsResp); err != nil {
+		response.DockerError(c, "解析响应失败", err.Error())
+		return
+	}
+
+	// 提取标签名
+	var tags []string
+	for _, t := range tagsResp.Results {
+		if t.Name != "" {
+			tags = append(tags, t.Name)
+		}
+	}
+
+	response.Success(c, gin.H{"tags": tags})
+}
+
+// getTagsFromRegistry 从 Registry 获取镜像标签
+func (h *ImageHandler) getTagsFromRegistry(registry, imageName string) ([]string, error) {
+	// 构建 Registry API URL
+	// 格式: https://registry.example.com/v2/library/nginx/tags/list
+	client := &http.Client{Timeout: 10 * 1000000000}
+
+	// 对于官方镜像，需要添加 library/ 前缀
+	if !strings.Contains(imageName, "/") {
+		imageName = "library/" + imageName
+	}
+
+	apiURL := fmt.Sprintf("https://%s/v2/%s/tags/list", registry, imageName)
+
+	resp, err := client.Get(apiURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var tagsResp struct {
+		Tags []string `json:"tags"`
+	}
+
+	if err := json.Unmarshal(body, &tagsResp); err != nil {
+		return nil, err
+	}
+
+	return tagsResp.Tags, nil
 }
 
 type ImageBuildRequest struct {
@@ -569,4 +881,285 @@ func (h *ImageHandler) Build(c *gin.Context) {
 
 	addAuditLog(c, "image_build", map[string]interface{}{"tag": req.Tag})
 	response.Success(c, gin.H{"success": true})
+}
+
+// EditTagsRequest 编辑标签请求
+type EditTagsRequest struct {
+	Tags []string `json:"tags" binding:"required"`
+}
+
+// EditTags 编辑镜像标签
+func (h *ImageHandler) EditTags(c *gin.Context) {
+	ctx, cancel := docker.Context()
+	defer cancel()
+
+	id := c.Param("id")
+
+	var req EditTagsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "参数错误: "+err.Error())
+		return
+	}
+
+	// 验证标签格式
+	for _, tag := range req.Tags {
+		if !isValidImageName(tag) {
+			response.BadRequest(c, "无效的标签格式: "+tag)
+			return
+		}
+	}
+
+	// 获取镜像信息
+	inspect, err := h.service.Inspect(ctx, id)
+	if err != nil {
+		response.DockerError(c, "获取镜像信息失败", err.Error())
+		return
+	}
+
+	// 获取当前镜像ID
+	imageID := inspect.ID
+
+	// 检查新标签是否与旧标签相同
+	if len(req.Tags) > 0 && len(inspect.RepoTags) > 0 {
+		oldTag := inspect.RepoTags[0]
+		newTag := req.Tags[0]
+		if oldTag == newTag {
+			response.Success(c, gin.H{"success": true, "message": "标签未改变"})
+			return
+		}
+	}
+
+	// 删除旧标签（保留第一个作为基础）
+	if len(inspect.RepoTags) > 0 {
+		for i, tag := range inspect.RepoTags {
+			if i == 0 && len(req.Tags) > 0 {
+				// 保留第一个标签，后续会重新标记
+				continue
+			}
+			if err := h.service.RemoveTag(ctx, tag); err != nil {
+				log.Printf("[编辑标签] 删除旧标签失败 %s: %v", tag, err)
+			}
+		}
+	}
+
+	// 添加新标签
+	for _, tag := range req.Tags {
+		if err := h.service.Tag(ctx, imageID, tag); err != nil {
+			response.DockerError(c, "添加标签失败: "+tag, err.Error())
+			return
+		}
+	}
+
+	addAuditLog(c, "image_edit_tags", map[string]interface{}{"image": id, "tags": req.Tags})
+	response.Success(c, gin.H{"success": true, "tags": req.Tags})
+}
+
+// DetectUpgrade 检测镜像可升级版本
+func (h *ImageHandler) DetectUpgrade(c *gin.Context) {
+	ctx, cancel := docker.ContextWithTimeout(30 * 1000 * 1000000)
+	defer cancel()
+
+	id := c.Param("id")
+
+	inspect, err := h.service.Inspect(ctx, id)
+	if err != nil {
+		response.DockerError(c, "获取镜像信息失败", err.Error())
+		return
+	}
+
+	// 获取当前镜像名称和标签
+	imageName := ""
+	currentTag := "latest"
+	if len(inspect.RepoTags) > 0 && inspect.RepoTags[0] != "<none>:<none>" {
+		parts := strings.Split(inspect.RepoTags[0], ":")
+		if len(parts) >= 2 {
+			imageName = parts[0]
+			currentTag = parts[1]
+		} else {
+			imageName = inspect.RepoTags[0]
+		}
+	} else if len(inspect.RepoDigests) > 0 {
+		parts := strings.SplitN(inspect.RepoDigests[0], "@", 2)
+		if len(parts) > 0 {
+			imageName = parts[0]
+		}
+	}
+
+	if imageName == "" {
+		response.Success(c, gin.H{"available": false, "message": "无法确定镜像名称"})
+		return
+	}
+
+	// 验证镜像名称格式
+	if !isValidImageName(imageName) {
+		response.Success(c, gin.H{"available": false, "message": "无效的镜像名称"})
+		return
+	}
+
+	// 获取镜像加速源
+	registry := c.Query("registry")
+
+	// 获取所有可用标签
+	var allTags []string
+	if registry != "" {
+		registry = normalizeRegistry(registry)
+		allTags, err = h.getTagsFromRegistry(registry, imageName)
+		if err != nil {
+			log.Printf("[检测升级] 从加速源获取标签失败: %v", err)
+		}
+	}
+
+	// 如果加速源失败或未配置，尝试 Docker Hub
+	if len(allTags) == 0 {
+		client := &http.Client{Timeout: 10 * 1000000000}
+		apiURL := "https://registry.hub.docker.com/v2/repositories/" + url.PathEscape(imageName) + "/tags/?page_size=100"
+
+		resp, err := client.Get(apiURL)
+		if err != nil {
+			response.Success(c, gin.H{"available": false, "message": "无法连接到镜像仓库"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			response.Success(c, gin.H{"available": false, "message": "镜像仓库返回错误: " + fmt.Sprintf("HTTP %d", resp.StatusCode)})
+			return
+		}
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			response.Success(c, gin.H{"available": false, "message": "读取响应失败"})
+			return
+		}
+
+		var tagsResp struct {
+			Results []struct {
+				Name string `json:"name"`
+			} `json:"results"`
+		}
+
+		if err := json.Unmarshal(body, &tagsResp); err != nil {
+			response.Success(c, gin.H{"available": false, "message": "解析响应失败"})
+			return
+		}
+
+		for _, t := range tagsResp.Results {
+			if t.Name != "" {
+				allTags = append(allTags, t.Name)
+			}
+		}
+	}
+
+	if len(allTags) == 0 {
+		response.Success(c, gin.H{"available": false, "message": "未找到可用标签"})
+		return
+	}
+
+	// 分析版本，找出可升级的版本
+	upgradableVersions := analyzeVersions(currentTag, allTags)
+
+	response.Success(c, gin.H{
+		"available":          true,
+		"currentTag":         currentTag,
+		"imageName":          imageName,
+		"allTags":            allTags[:min(20, len(allTags))],
+		"upgradableVersions": upgradableVersions,
+	})
+}
+
+// analyzeVersions 分析版本，找出可升级的版本
+func analyzeVersions(currentTag string, allTags []string) []string {
+	// 如果当前标签不是版本号格式，返回空
+	if !isVersionTag(currentTag) {
+		return []string{}
+	}
+
+	var upgradable []string
+	currentVersion := parseVersion(currentTag)
+
+	for _, tag := range allTags {
+		if isVersionTag(tag) {
+			tagVersion := parseVersion(tag)
+			if compareVersions(tagVersion, currentVersion) > 0 {
+				upgradable = append(upgradable, tag)
+			}
+		}
+	}
+
+	// 按版本号排序
+	sortVersions(upgradable)
+
+	return upgradable[:min(10, len(upgradable))]
+}
+
+// isVersionTag 检查标签是否是版本号格式
+func isVersionTag(tag string) bool {
+	// 匹配常见的版本格式: 1.0, 1.0.0, v1.0, v1.0.0, 1.0-alpine, 1.0.0-alpine3.18 等
+	matched, _ := regexp.MatchString(`^v?\d+(\.\d+)*([\-\+].*)?$`, tag)
+	return matched
+}
+
+// parseVersion 解析版本号为可比较的数组
+func parseVersion(tag string) []int {
+	// 移除 v 前缀
+	tag = strings.TrimPrefix(tag, "v")
+	// 移除 - 后面的内容（如 -alpine）
+	if idx := strings.Index(tag, "-"); idx > 0 {
+		tag = tag[:idx]
+	}
+	if idx := strings.Index(tag, "+"); idx > 0 {
+		tag = tag[:idx]
+	}
+
+	parts := strings.Split(tag, ".")
+	var version []int
+	for _, p := range parts {
+		if n, err := strconv.Atoi(p); err == nil {
+			version = append(version, n)
+		}
+	}
+	return version
+}
+
+// compareVersions 比较两个版本号
+// 返回: 1 表示 v1 > v2, -1 表示 v1 < v2, 0 表示相等
+func compareVersions(v1, v2 []int) int {
+	maxLen := len(v1)
+	if len(v2) > maxLen {
+		maxLen = len(v2)
+	}
+
+	for i := 0; i < maxLen; i++ {
+		var n1, n2 int
+		if i < len(v1) {
+			n1 = v1[i]
+		}
+		if i < len(v2) {
+			n2 = v2[i]
+		}
+
+		if n1 > n2 {
+			return 1
+		}
+		if n1 < n2 {
+			return -1
+		}
+	}
+	return 0
+}
+
+// sortVersions 对版本号进行排序（降序）
+func sortVersions(versions []string) {
+	sort.Slice(versions, func(i, j int) bool {
+		vi := parseVersion(versions[i])
+		vj := parseVersion(versions[j])
+		return compareVersions(vi, vj) > 0
+	})
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

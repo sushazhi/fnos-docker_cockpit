@@ -235,6 +235,11 @@ func (s *ImageService) Tag(ctx context.Context, source, target string) error {
 	return cli.ImageTag(ctx, source, target)
 }
 
+func (s *ImageService) RemoveTag(ctx context.Context, tag string) error {
+	_, err := cli.ImageRemove(ctx, tag, image.RemoveOptions{})
+	return err
+}
+
 func (s *ImageService) Search(ctx context.Context, term string, opts types.ImageSearchOptions) ([]registry.SearchResult, error) {
 	return cli.ImageSearch(ctx, term, opts)
 }

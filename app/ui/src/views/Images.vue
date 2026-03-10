@@ -236,6 +236,21 @@
             </svg>
             {{ t('images.createContainer') }}
           </button>
+          <button class="sheet-btn" @click="showEditTagsDialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            编辑标签
+          </button>
+          <button class="sheet-btn" @click="showDetectUpgradeDialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            检测升级
+          </button>
           <button v-if="selectedImage?.hasUpdate" class="sheet-btn update" @click="updateSelectedImage">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -264,6 +279,113 @@
       @close="showConfirm = false"
       @confirm="removeImage"
     />
+
+    <!-- 编辑标签对话框 -->
+    <div v-if="showEditTagsModal" class="dialog-overlay" @click.self="showEditTagsModal = false">
+      <div class="dialog">
+        <div class="dialog-header">
+          <h3 class="dialog-title">编辑标签</h3>
+          <button class="dialog-close" @click="showEditTagsModal = false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="dialog-body">
+          <div class="form-field">
+            <label class="form-label">当前标签</label>
+            <input type="text" class="form-input" :value="editTagsCurrent" readonly />
+          </div>
+          <div class="form-field">
+            <label class="form-label">新仓库名</label>
+            <input type="text" class="form-input" v-model="editTagsRepo" placeholder="nginx" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">新标签</label>
+            <input type="text" class="form-input" v-model="editTagsTag" placeholder="latest" />
+          </div>
+          <div class="form-hint" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-top: 16px;">
+            编辑标签会创建新标签并删除旧标签。如果新旧标签相同则不会进行任何操作。
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn secondary" @click="showEditTagsModal = false">取消</button>
+          <button class="dialog-btn primary" @click="saveEditTags" :disabled="editingTags">
+            {{ editingTags ? '保存中...' : '确定' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 检测升级对话框 -->
+    <div v-if="showDetectUpgradeModal" class="dialog-overlay" @click.self="closeDetectUpgrade">
+      <div class="dialog dialog-large">
+        <div class="dialog-header">
+          <h3 class="dialog-title">检测升级: {{ detectUpgradeImageName }}</h3>
+          <button class="dialog-close" @click="closeDetectUpgrade">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="dialog-body">
+          <!-- 进度条 -->
+          <div v-if="detectUpgradeLoading" class="upgrade-progress">
+            <div class="progress-header">
+              <span class="progress-title">{{ detectUpgradeStep }}</span>
+              <span class="progress-percent">{{ detectUpgradePercent }}%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" :style="{ width: detectUpgradePercent + '%' }"></div>
+            </div>
+          </div>
+
+          <!-- 检测步骤 -->
+          <div class="upgrade-steps">
+            <div v-for="(step, index) in detectUpgradeSteps" :key="index" class="upgrade-step" :class="{ active: step.active, completed: step.completed }">
+              <div class="step-indicator">
+                <span v-if="step.completed" class="step-check">✓</span>
+                <span v-else class="step-number">{{ index + 1 }}</span>
+              </div>
+              <div class="step-content">
+                <div class="step-title">{{ step.title }}</div>
+                <div class="step-desc">{{ step.desc }}</div>
+              </div>
+              <div class="step-meta">
+                <span v-if="step.percent" class="step-percent">{{ step.percent }}%</span>
+                <span v-if="step.time" class="step-time">{{ step.time }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 可升级版本列表 -->
+          <div v-if="!detectUpgradeLoading && upgradableVersions.length > 0" class="upgrade-versions">
+            <h4 class="versions-title">可升级版本</h4>
+            <div class="versions-list">
+              <div v-for="version in upgradableVersions" :key="version" class="version-item" @click="upgradeToVersion(version)">
+                <span class="version-name">{{ version }}</span>
+                <button class="version-upgrade-btn">升级</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 无可用升级 -->
+          <div v-if="!detectUpgradeLoading && detectUpgradeComplete && upgradableVersions.length === 0" class="upgrade-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>当前已是最新版本</span>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn secondary" @click="closeDetectUpgrade">关闭</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -297,12 +419,60 @@ const showConfirm = ref(false)
 const selectedImage = ref(null)
 const updating = ref(false)
 
+// 编辑标签相关
+const showEditTagsModal = ref(false)
+const editTagsCurrent = ref('')
+const editTagsRepo = ref('')
+const editTagsTag = ref('')
+const editingTags = ref(false)
+
+// 检测升级相关
+const showDetectUpgradeModal = ref(false)
+const detectUpgradeImageName = ref('')
+const detectUpgradeLoading = ref(false)
+const detectUpgradeComplete = ref(false)
+const detectUpgradePercent = ref(0)
+const detectUpgradeStep = ref('')
+const upgradableVersions = ref([])
+const detectUpgradeSteps = ref([
+  { title: '准备中...', desc: '开始镜像升级检测...', percent: 5, time: '', active: true, completed: false },
+  { title: '获取本地镜像信息...', desc: '获取本地镜像信息...', percent: 15, time: '', active: false, completed: false },
+  { title: '统计使用此镜像的容器...', desc: '统计使用此镜像的容器...', percent: 25, time: '', active: false, completed: false },
+  { title: '检查远程镜像版本...', desc: '检查远程镜像版本...', percent: 40, time: '', active: false, completed: false }
+])
+
 function getImageName(img) {
   if (img.RepoTags && img.RepoTags.length > 0 && img.RepoTags[0] !== '<none>:<none>') {
-    return img.RepoTags[0]
+    let tag = img.RepoTags[0]
+    // 移除加速源前缀
+    const registry = localStorage.getItem('docker_registry_mirror') || ''
+    if (registry) {
+      let cleanRegistry = registry.trim()
+      // 移除协议前缀
+      cleanRegistry = cleanRegistry.replace(/^https?:\/\//, '')
+      // 移除末尾的斜杠
+      cleanRegistry = cleanRegistry.replace(/\/$/, '')
+      if (cleanRegistry && tag.startsWith(cleanRegistry + '/')) {
+        tag = tag.substring(cleanRegistry.length + 1)
+      }
+    }
+    return tag
   }
   if (img.RepoDigests && img.RepoDigests.length > 0) {
-    return img.RepoDigests[0].split('@')[0]
+    let digest = img.RepoDigests[0].split('@')[0]
+    // 移除加速源前缀
+    const registry = localStorage.getItem('docker_registry_mirror') || ''
+    if (registry) {
+      let cleanRegistry = registry.trim()
+      // 移除协议前缀
+      cleanRegistry = cleanRegistry.replace(/^https?:\/\//, '')
+      // 移除末尾的斜杠
+      cleanRegistry = cleanRegistry.replace(/\/$/, '')
+      if (cleanRegistry && digest.startsWith(cleanRegistry + '/')) {
+        digest = digest.substring(cleanRegistry.length + 1)
+      }
+    }
+    return digest
   }
   return img.Id?.substring(7, 19) || 'unknown'
 }
@@ -360,19 +530,29 @@ async function refresh() {
 }
 
 async function checkUpdates() {
-  try {
-    const checkData = await api.get('/api/image/search/check')
-    if (!checkData.available) {
+  // 获取镜像加速源
+  let registry = localStorage.getItem('docker_registry_mirror') || ''
+  registry = registry.replace(/[`'"]/g, '').trim()
+
+  // 如果没有配置加速源，先检查 Docker Hub 是否可连接
+  if (!registry) {
+    try {
+      const checkData = await api.get('/api/image/search/check')
+      if (!checkData.available) {
+        return
+      }
+    } catch (e) {
       return
     }
-  } catch (e) {
-    return
   }
-  
+
   for (const img of images.value) {
     if (img.RepoTags && img.RepoTags[0] && img.RepoTags[0] !== '<none>:<none>') {
       try {
-        const result = await api.get(`/api/image/${img.Id}/check-update`)
+        const url = registry
+          ? `/api/image/${img.Id}/check-update?registry=${encodeURIComponent(registry)}`
+          : `/api/image/${img.Id}/check-update`
+        const result = await api.get(url)
         img.hasUpdate = result.hasUpdate
       } catch (e) {
         img.hasUpdate = false
@@ -567,10 +747,14 @@ function confirmRemove() {
 
 async function removeImage() {
   try {
-    await api.post(`/api/image/${selectedImage.value.Id}/remove`, { force: true })
+    const imageId = selectedImage.value.Id
+    await api.post(`/api/image/${imageId}/remove`, { force: true })
     showToast(t('images.removeSuccess'))
     showConfirm.value = false
-    refresh()
+    // 清除选中的镜像，避免刷新时出现状态混乱
+    selectedImage.value = null
+    // 延迟刷新，确保Docker完成删除操作
+    setTimeout(refresh, 500)
   } catch (e) {
     showToast(t('images.removeFailed') + ': ' + e.message)
   }
@@ -580,7 +764,11 @@ async function updateImage(img) {
   if (updating.value) return
   updating.value = true
   try {
-    await api.post(`/api/image/${img.Id}/update`)
+    // 获取镜像加速源
+    let registry = localStorage.getItem('docker_registry_mirror') || ''
+    registry = registry.replace(/[`'"]/g, '').trim()
+
+    await api.post(`/api/image/${img.Id}/update`, { registry: registry || undefined })
     showToast(t('images.updateSuccess'))
     refresh()
   } catch (e) {
@@ -595,7 +783,11 @@ async function updateSelectedImage() {
   showActions.value = false
   updating.value = true
   try {
-    await api.post(`/api/image/${selectedImage.value.Id}/update`)
+    // 获取镜像加速源
+    let registry = localStorage.getItem('docker_registry_mirror') || ''
+    registry = registry.replace(/[`'"]/g, '').trim()
+
+    await api.post(`/api/image/${selectedImage.value.Id}/update`, { registry: registry || undefined })
     showToast(t('images.updateSuccess'))
     refresh()
   } catch (e) {
@@ -603,6 +795,205 @@ async function updateSelectedImage() {
   } finally {
     updating.value = false
   }
+}
+
+// 编辑标签功能
+function showEditTagsDialog() {
+  if (!selectedImage.value) return
+  showActions.value = false
+
+  const imageName = getImageName(selectedImage.value)
+  const parts = imageName.split(':')
+  editTagsRepo.value = parts[0] || ''
+  editTagsTag.value = parts[1] || 'latest'
+  editTagsCurrent.value = imageName
+
+  showEditTagsModal.value = true
+}
+
+async function saveEditTags() {
+  if (!selectedImage.value || !editTagsRepo.value || !editTagsTag.value) return
+
+  editingTags.value = true
+  try {
+    // 清理仓库名中的加速源前缀
+    let cleanRepo = editTagsRepo.value.trim()
+    const registry = localStorage.getItem('docker_registry_mirror') || ''
+    if (registry) {
+      let cleanRegistry = registry.trim()
+      // 移除协议前缀
+      cleanRegistry = cleanRegistry.replace(/^https?:\/\//, '')
+      // 移除末尾的斜杠
+      cleanRegistry = cleanRegistry.replace(/\/$/, '')
+      // 如果仓库名以加速源开头，移除它
+      if (cleanRegistry && cleanRepo.startsWith(cleanRegistry + '/')) {
+        cleanRepo = cleanRepo.substring(cleanRegistry.length + 1)
+      }
+    }
+    
+    const newTag = `${cleanRepo}:${editTagsTag.value.trim()}`
+    await api.post(`/api/image/${selectedImage.value.Id}/edit-tags`, {
+      tags: [newTag]
+    })
+    showToast('标签编辑成功')
+    showEditTagsModal.value = false
+    refresh()
+  } catch (e) {
+    showToast('标签编辑失败: ' + e.message)
+  } finally {
+    editingTags.value = false
+  }
+}
+
+// 检测升级功能
+function showDetectUpgradeDialog() {
+  if (!selectedImage.value) return
+  showActions.value = false
+
+  const imageName = getImageName(selectedImage.value)
+  detectUpgradeImageName.value = imageName
+  showDetectUpgradeModal.value = true
+
+  // 重置状态
+  detectUpgradeLoading.value = true
+  detectUpgradeComplete.value = false
+  detectUpgradePercent.value = 5
+  detectUpgradeStep.value = '准备中...'
+  upgradableVersions.value = []
+
+  // 重置步骤状态
+  detectUpgradeSteps.value.forEach((step, index) => {
+    step.active = index === 0
+    step.completed = false
+    step.time = new Date().toLocaleTimeString()
+  })
+
+  // 开始检测
+  detectUpgrade()
+}
+
+async function detectUpgrade() {
+  if (!selectedImage.value) return
+
+  try {
+    // 模拟进度更新
+    const steps = detectUpgradeSteps.value
+
+    // 步骤1: 准备中
+    await delay(500)
+    steps[0].completed = true
+    steps[0].active = false
+    steps[1].active = true
+    detectUpgradePercent.value = 15
+    detectUpgradeStep.value = steps[1].title
+
+    // 步骤2: 获取本地镜像信息
+    await delay(800)
+    steps[1].completed = true
+    steps[1].active = false
+    steps[2].active = true
+    detectUpgradePercent.value = 25
+    detectUpgradeStep.value = steps[2].title
+
+    // 步骤3: 统计容器
+    await delay(600)
+    steps[2].completed = true
+    steps[2].active = false
+    steps[3].active = true
+    detectUpgradePercent.value = 40
+    detectUpgradeStep.value = steps[3].title
+
+    // 步骤4: 检查远程版本
+    let registry = localStorage.getItem('docker_registry_mirror') || ''
+    registry = registry.replace(/[`'"]/g, '').trim()
+
+    const url = registry
+      ? `/api/image/${selectedImage.value.Id}/detect-upgrade?registry=${encodeURIComponent(registry)}`
+      : `/api/image/${selectedImage.value.Id}/detect-upgrade`
+
+    const result = await api.get(url)
+
+    steps[3].completed = true
+    steps[3].active = false
+    detectUpgradePercent.value = 100
+    detectUpgradeStep.value = '检测完成'
+
+    if (result.available && result.upgradableVersions) {
+      upgradableVersions.value = result.upgradableVersions
+    }
+
+    detectUpgradeComplete.value = true
+    detectUpgradeLoading.value = false
+
+  } catch (e) {
+    showToast('检测升级失败: ' + e.message)
+    detectUpgradeLoading.value = false
+    detectUpgradeComplete.value = true
+  }
+}
+
+function closeDetectUpgrade() {
+  showDetectUpgradeModal.value = false
+}
+
+async function upgradeToVersion(version) {
+  if (!selectedImage.value || updating.value) return
+
+  updating.value = true
+  try {
+    const imageName = detectUpgradeImageName.value.split(':')[0]
+    const fullImage = `${imageName}:${version}`
+    const oldImageName = detectUpgradeImageName.value
+
+    // 拉取新版本
+    await api.post('/api/image/pull', {
+      image: fullImage,
+      registry: localStorage.getItem('docker_registry_mirror') || undefined
+    })
+
+    // 获取使用该镜像的容器
+    const containersData = await api.get('/api/containers')
+    const containers = containersData.containers || []
+    const usingContainers = containers.filter(container => 
+      container.Image === oldImageName || 
+      container.ImageID === selectedImage.value.Id
+    )
+
+    // 重启使用该镜像的容器
+    if (usingContainers.length > 0) {
+      for (const container of usingContainers) {
+        try {
+          await api.post(`/api/container/${container.Id}/restart`, { timeout: 10 })
+        } catch (e) {
+          console.error(`重启容器 ${container.Names[0]} 失败:`, e)
+        }
+      }
+      showToast(`已升级到版本: ${version}，并重启了 ${usingContainers.length} 个容器`)
+    } else {
+      showToast(`已升级到版本: ${version}`)
+    }
+
+    // 询问是否删除旧镜像
+    if (confirm('升级完成，是否删除旧版本的镜像？')) {
+      try {
+        await api.post(`/api/image/${selectedImage.value.Id}/remove`, { force: true })
+        showToast('旧镜像已删除')
+      } catch (e) {
+        showToast('删除旧镜像失败: ' + e.message)
+      }
+    }
+
+    closeDetectUpgrade()
+    refresh()
+  } catch (e) {
+    showToast('升级失败: ' + e.message)
+  } finally {
+    updating.value = false
+  }
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 onMounted(() => {
@@ -1065,5 +1456,199 @@ onMounted(() => {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* 检测升级对话框样式 */
+.dialog-large {
+  max-width: 480px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-large .dialog-body {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(80vh - 120px);
+}
+
+.upgrade-progress {
+  margin-bottom: 20px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-title {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.progress-percent {
+  font-size: 14px;
+  font-weight: 600;
+  color: #007DFF;
+}
+
+.upgrade-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.upgrade-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  opacity: 0.6;
+  transition: all 0.3s;
+}
+
+.upgrade-step.active {
+  opacity: 1;
+  background: rgba(0, 125, 255, 0.1);
+}
+
+.upgrade-step.completed {
+  opacity: 1;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.step-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.upgrade-step.active .step-indicator {
+  background: #007DFF;
+  color: white;
+}
+
+.upgrade-step.completed .step-indicator {
+  background: #28a745;
+  color: white;
+}
+
+.step-check {
+  font-size: 14px;
+}
+
+.step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 2px;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.step-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.step-percent {
+  font-size: 12px;
+  font-weight: 600;
+  color: #007DFF;
+}
+
+.step-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.upgrade-versions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.versions-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 12px;
+}
+
+.versions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.version-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.version-item:hover {
+  background: var(--hover-bg);
+}
+
+.version-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.version-upgrade-btn {
+  padding: 6px 16px;
+  background: #007DFF;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.upgrade-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  gap: 12px;
+}
+
+.upgrade-empty svg {
+  width: 48px;
+  height: 48px;
+  stroke: #28a745;
 }
 </style>

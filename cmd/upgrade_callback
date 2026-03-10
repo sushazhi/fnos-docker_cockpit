@@ -1,3 +1,8 @@
 #!/bin/bash
-systemctl restart dockpit 2>/dev/null || true
+
+if ! systemctl restart dockpit 2>/dev/null; then
+    echo "Error: Failed to restart dockpit service" > "$TRIM_TEMP_LOGFILE"
+    exit 1
+fi
+
 exit 0

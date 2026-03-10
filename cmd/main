@@ -19,9 +19,15 @@ start_process() {
     
     log_msg "Starting $APP_NAME on port $PORT..."
     
-    mkdir -p "${TRIM_PKGVAR}"
+    if ! mkdir -p "${TRIM_PKGVAR}"; then
+        echo "Error: Failed to create data directory ${TRIM_PKGVAR}" > "$TRIM_TEMP_LOGFILE"
+        return 1
+    fi
     
-    cd "$APP_DIR"
+    cd "$APP_DIR" || {
+        echo "Error: Failed to change to app directory $APP_DIR" > "$TRIM_TEMP_LOGFILE"
+        return 1
+    }
     
     PORT=$PORT DPANEL_DATA_DIR="${TRIM_PKGVAR}" ./server/dockpit >> ${LOG_FILE} 2>&1 &
     printf "%s" "$!" > "$PID_FILE"
@@ -41,7 +47,7 @@ start_process() {
         echo ""
         return 0
     else
-        log_msg "Failed to start $APP_NAME"
+        echo "Error: Failed to start $APP_NAME" > "$TRIM_TEMP_LOGFILE"
         return 1
     fi
 }

@@ -1,5 +1,3 @@
 #!/bin/bash
-DATA_DIR="${wizard_data_dir:-/vol1/@appdata/dockpit}"
-mkdir -p "$DATA_DIR"
-chmod 755 "$DATA_DIR"
+# 数据目录由服务在启动时自动创建，不需要在安装时创建
 exit 0

@@ -473,7 +473,7 @@
                     <span v-if="result.is_official" class="result-official">官方</span>
                   </div>
                 </div>
-                <button class="result-download-btn" @click="downloadImage(result.name)">
+                <button class="result-download-btn" @click="openDownloadModal(result.name)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -507,6 +507,52 @@
       </div>
     </div>
   </div>
+
+  <!-- 下载镜像弹窗 -->
+  <div v-if="showDownloadModal" class="dialog-overlay" @click.self="showDownloadModal = false">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h3 class="dialog-title">下载镜像</h3>
+        <button class="dialog-close" @click="showDownloadModal = false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="dialog-body">
+        <div class="form-field">
+          <label class="form-label">镜像名称</label>
+          <input type="text" class="form-input" :value="selectedImage" disabled />
+        </div>
+        <div class="form-field">
+          <label class="form-label">标签</label>
+          <div v-if="loadingTags" class="tags-loading">
+            <div class="spinner-small"></div>
+            <span>加载标签中...</span>
+          </div>
+          <select v-else-if="availableTags.length > 0" class="form-input" v-model="downloadTag">
+            <option v-for="tag in availableTags" :key="tag" :value="tag">{{ tag }}</option>
+          </select>
+          <input
+            v-else
+            type="text"
+            class="form-input"
+            v-model="downloadTag"
+            placeholder="latest"
+            @keyup.enter="downloadImage"
+          />
+          <div class="form-hint" v-if="availableTags.length > 0">共 {{ availableTags.length }} 个标签可选</div>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="dialog-btn secondary" @click="showDownloadModal = false">取消</button>
+        <button class="dialog-btn primary" @click="downloadImage" :disabled="downloading">
+          {{ downloading ? '下载中...' : '下载' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -525,6 +571,7 @@ const showChangePassword = ref(false)
 const showAuditLogs = ref(false)
 const showRegistryModal = ref(false)
 const showSearchModal = ref(false)
+const showDownloadModal = ref(false)
 const auditLogs = ref([])
 const changing = ref(false)
 const savingRegistry = ref(false)
@@ -534,6 +581,11 @@ const searching = ref(false)
 const searchResults = ref([])
 const hasSearched = ref(false)
 const searchAvailable = ref(false)
+const selectedImage = ref('')
+const downloadTag = ref('latest')
+const downloading = ref(false)
+const availableTags = ref([])
+const loadingTags = ref(false)
 let searchTimeout = null
 const appInfo = ref({
   version: '',
@@ -549,6 +601,17 @@ const passwordForm = ref({
 
 // 检查搜索功能是否可用
 async function checkSearchAvailable() {
+  // 获取镜像加速源
+  let registry = localStorage.getItem('docker_registry_mirror') || ''
+  registry = registry.replace(/[`'"]/g, '').trim()
+
+  // 如果配置了加速源，直接认为搜索可用
+  if (registry) {
+    searchAvailable.value = true
+    return
+  }
+
+  // 没有配置加速源，检查 Docker Hub 是否可连接
   try {
     const data = await api.get('/api/image/search/check')
     searchAvailable.value = data.available || false
@@ -759,7 +822,14 @@ async function doSearch() {
   hasSearched.value = true
   searching.value = true
   try {
-    const data = await api.get(`/api/image/search?term=${encodeURIComponent(searchKeyword.value.trim())}&limit=10`)
+    // 获取镜像加速源
+    let registry = localStorage.getItem('docker_registry_mirror') || ''
+    registry = registry.replace(/[`'"]/g, '').trim()
+
+    const url = registry
+      ? `/api/image/search?term=${encodeURIComponent(searchKeyword.value.trim())}&limit=10&registry=${encodeURIComponent(registry)}`
+      : `/api/image/search?term=${encodeURIComponent(searchKeyword.value.trim())}&limit=10`
+    const data = await api.get(url)
     searchResults.value = data.results || []
   } catch (e) {
     console.error('搜索失败:', e)
@@ -769,19 +839,50 @@ async function doSearch() {
   }
 }
 
-// 下载镜像
-async function downloadImage(name) {
+// 打开下载弹窗
+async function openDownloadModal(name) {
+  selectedImage.value = name
+  downloadTag.value = 'latest'
+  availableTags.value = []
+  showDownloadModal.value = true
+
+  // 获取镜像标签
+  loadingTags.value = true
   try {
     let registry = localStorage.getItem('docker_registry_mirror') || ''
-    registry = registry.replace(/[`'"]/g, '').trim() // 移除引号并清理
+    registry = registry.replace(/[`'"]/g, '').trim()
+
+    const url = registry
+      ? `/api/image/tags?image=${encodeURIComponent(name)}&registry=${encodeURIComponent(registry)}`
+      : `/api/image/tags?image=${encodeURIComponent(name)}`
+    const data = await api.get(url)
+    availableTags.value = data.tags || []
+  } catch (e) {
+    console.error('获取标签失败:', e)
+    availableTags.value = []
+  } finally {
+    loadingTags.value = false
+  }
+}
+
+// 下载镜像
+async function downloadImage() {
+  if (!selectedImage.value || downloading.value) return
+  downloading.value = true
+  try {
+    let registry = localStorage.getItem('docker_registry_mirror') || ''
+    registry = registry.replace(/[`'"]/g, '').trim()
     await api.post('/api/image/pull', {
-      image: name + ':latest',
+      image: selectedImage.value + ':' + downloadTag.value,
       registry: registry
     })
-    showToast(t('settings.downloadStarted', { name }))
+    showToast(t('settings.downloadStarted', { name: selectedImage.value }))
+    showDownloadModal.value = false
     closeSearchModal()
   } catch (e) {
     showToast(t('settings.downloadFailed') + ': ' + e.message)
+  } finally {
+    downloading.value = false
   }
 }
 
@@ -1671,6 +1772,27 @@ function closeSearchModal() {
   border-top-color: #007DFF;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: #007DFF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.tags-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 @keyframes spin {

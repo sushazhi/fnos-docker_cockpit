@@ -119,19 +119,12 @@
         <!-- 概览标签 -->
         <div v-if="tab === 'overview'" class="info-section">
           <!-- 端口映射 -->
-          <div v-if="containerInfo?.NetworkSettings?.Ports && Object.keys(containerInfo.NetworkSettings.Ports).length > 0" class="info-block">
+          <div v-if="hasPortBindings(containerInfo)" class="info-block">
             <div class="info-block-title">{{ t('containers.ports') }}</div>
             <div class="info-block-content">
-              <div v-for="(bindings, port) in containerInfo.NetworkSettings.Ports" :key="port" class="info-line">
-                <span class="info-line-label">{{ port }}</span>
-                <span class="info-line-value">
-                  <template v-if="bindings && bindings.length > 0">
-                    <span v-for="(binding, idx) in bindings" :key="idx">
-                      {{ binding.HostIp === '0.0.0.0' ? '' : binding.HostIp + ':' }}{{ binding.HostPort }}
-                    </span>
-                  </template>
-                  <template v-else>-</template>
-                </span>
+              <div v-for="item in getPortBindingsList(containerInfo)" :key="item.key" class="info-line">
+                <span class="info-line-label">{{ item.container }}</span>
+                <span class="info-line-value">{{ item.host }}</span>
               </div>
             </div>
           </div>
@@ -639,6 +632,48 @@ function getStatusText(state) {
   }
 }
 
+// 检查是否有端口映射
+function hasPortBindings(info) {
+  if (!info?.NetworkSettings?.Ports) return false
+  for (const bindings of Object.values(info.NetworkSettings.Ports)) {
+    if (bindings && bindings.length > 0) return true
+  }
+  return false
+}
+
+// 获取端口映射列表（与编辑容器逻辑一致，去重）
+function getPortBindingsList(info) {
+  if (!info?.NetworkSettings?.Ports) return []
+
+  const result = []
+  const seenPorts = new Set()
+
+  for (const [containerPort, bindings] of Object.entries(info.NetworkSettings.Ports)) {
+    if (bindings && bindings.length > 0) {
+      // 去重：只取第一个有效绑定（优先 IPv4）
+      const validBinding = bindings.find(b => b.HostPort) || bindings[0]
+      if (validBinding) {
+        const hostPort = validBinding.HostPort
+        const hostIp = validBinding.HostIp
+        const [portNum, protocol] = containerPort.split('/')
+
+        // 去重键：主机端口 + 容器端口 + 协议
+        const uniqueKey = `${hostPort}:${portNum}:${protocol || 'tcp'}`
+        if (seenPorts.has(uniqueKey)) continue
+        seenPorts.add(uniqueKey)
+
+        const hostValue = (hostIp && hostIp !== '0.0.0.0' && hostIp !== '::') ? `${hostIp}:${hostPort}` : hostPort
+        result.push({
+          key: uniqueKey,
+          container: `${portNum}/${protocol || 'tcp'}`,
+          host: hostValue
+        })
+      }
+    }
+  }
+  return result
+}
+
 async function loadContainer() {
   loading.value = true
   try {
@@ -677,7 +712,7 @@ async function startContainer() {
   try {
     await api.post(`/api/container/${containerId}/start`)
     showToast(t('containers.started'))
-    loadContainer()
+    setTimeout(() => loadContainer(), 500)
   } catch (e) {
     showToast(t('containers.startFailed') + ': ' + e.message)
   }
@@ -687,7 +722,7 @@ async function stopContainer() {
   try {
     await api.post(`/api/container/${containerId}/stop`, { timeout: 10 })
     showToast(t('containers.stopped'))
-    loadContainer()
+    setTimeout(() => loadContainer(), 500)
   } catch (e) {
     showToast(t('containers.stopFailed') + ': ' + e.message)
   }
@@ -697,7 +732,7 @@ async function restartContainer() {
   try {
     await api.post(`/api/container/${containerId}/restart`, { timeout: 10 })
     showToast(t('containers.restarted'))
-    loadContainer()
+    setTimeout(() => loadContainer(), 500)
   } catch (e) {
     showToast(t('containers.restartFailed') + ': ' + e.message)
   }
@@ -707,7 +742,7 @@ async function pauseContainer() {
   try {
     await api.post(`/api/container/${containerId}/pause`)
     showToast(t('containers.paused'))
-    loadContainer()
+    setTimeout(() => loadContainer(), 500)
   } catch (e) {
     showToast(t('containers.pauseFailed') + ': ' + e.message)
   }
@@ -717,7 +752,7 @@ async function unpauseContainer() {
   try {
     await api.post(`/api/container/${containerId}/unpause`)
     showToast(t('containers.resumed'))
-    loadContainer()
+    setTimeout(() => loadContainer(), 500)
   } catch (e) {
     showToast(t('containers.resumeFailed') + ': ' + e.message)
   }
@@ -1348,22 +1383,31 @@ function openEditModal() {
   editForm.value.name = getContainerName(container.value) || ''
   editForm.value.hostname = config.Hostname || ''
 
-  // 填充端口映射
+  // 填充端口映射（去重处理）
   editForm.value.ports = []
   if (info.NetworkSettings?.Ports) {
+    const seenPorts = new Set()
     for (const [containerPort, bindings] of Object.entries(info.NetworkSettings.Ports)) {
       if (bindings && bindings.length > 0) {
-        bindings.forEach(binding => {
-          const hostPort = binding.HostPort
-          const hostIp = binding.HostIp
+        // 去重：只取第一个有效绑定（优先 IPv4）
+        const validBinding = bindings.find(b => b.HostPort) || bindings[0]
+        if (validBinding) {
+          const hostPort = validBinding.HostPort
+          const hostIp = validBinding.HostIp
           const [portNum, protocol] = containerPort.split('/')
-          const hostValue = (hostIp && hostIp !== '0.0.0.0') ? `${hostIp}:${hostPort}` : hostPort
+          
+          // 去重键：主机端口 + 容器端口 + 协议
+          const uniqueKey = `${hostPort}:${portNum}:${protocol || 'tcp'}`
+          if (seenPorts.has(uniqueKey)) continue
+          seenPorts.add(uniqueKey)
+          
+          const hostValue = (hostIp && hostIp !== '0.0.0.0' && hostIp !== '::') ? `${hostIp}:${hostPort}` : hostPort
           editForm.value.ports.push({
             host: hostValue,
             container: portNum,
             protocol: protocol || 'tcp'
           })
-        })
+        }
       }
     }
   }

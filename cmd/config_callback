@@ -1,12 +1,5 @@
 #!/bin/bash
 PORT="${wizard_app_port:-8807}"
 
-if [ -f /etc/dockpit.conf ]; then
-    sed -i "s/^PORT=.*/PORT=$PORT/" /etc/dockpit.conf
-else
-    echo "PORT=$PORT" > /etc/dockpit.conf
-fi
-
-systemctl restart dockpit 2>/dev/null || true
-
+# 配置通过环境变量传递，不需要写入配置文件
 exit 0

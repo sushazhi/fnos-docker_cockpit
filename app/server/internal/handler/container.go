@@ -645,18 +645,8 @@ func (h *ContainerHandler) ExecRead(c *gin.Context) {
 func (h *ContainerHandler) ExecWebSocket(c *gin.Context) {
 	execID := c.Param("execId")
 
-	// 优先从 Cookie 获取会话 token（更安全，避免 URL 泄露）
-	// 查询参数 token 仅作为备选方案（某些 WebSocket 客户端可能不支持 Cookie）
-	var sessionToken string
-	if token, err := c.Cookie("session_token"); err == nil && token != "" {
-		sessionToken = token
-	} else {
-		// 备选：从查询参数获取（注意：URL 中的 token 可能被记录在日志中）
-		sessionToken = c.Query("token")
-	}
-
-	// 验证会话和 execID 所有权
-	if sessionToken == "" {
+	sessionToken, err := c.Cookie("session_token")
+	if err != nil || sessionToken == "" {
 		c.JSON(401, gin.H{"error": "Authentication required"})
 		return
 	}

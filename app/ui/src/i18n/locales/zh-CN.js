@@ -378,6 +378,20 @@ export default {
     passwordChanged: '密码修改成功',
     passwordFailed: '修改失败'
   },
+  setup: {
+    title: '首次登录设置',
+    desc: '欢迎使用 Dockpit，请设置您的登录信息',
+    username: '用户名',
+    password: '密码',
+    confirmPassword: '确认密码',
+    setting: '设置中...',
+    submit: '确定',
+    passwordMin: '密码至少8位',
+    passwordMismatch: '两次密码不一致',
+    passwordMatch: '密码一致',
+    required: '请填写所有必填字段',
+    failed: '设置失败'
+  },
   appearance: {
     title: '外观',
     desc: '主题与显示设置',

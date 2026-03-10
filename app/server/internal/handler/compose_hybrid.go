@@ -239,7 +239,7 @@ func (h *ComposeHybridHandler) Save(c *gin.Context) {
     }
 
     path := filepath.Join(h.getComposeDir(), req.Name+".yml")
-    if err := os.WriteFile(path, []byte(req.Content), 0644); err != nil {
+    if err := os.WriteFile(path, []byte(req.Content), 0600); err != nil {
         response.InternalError(c, "Failed to save file")
         return
     }

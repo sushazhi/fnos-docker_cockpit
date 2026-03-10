@@ -28,6 +28,21 @@ func NewComposeHandler() *ComposeHandler {
 	return &ComposeHandler{}
 }
 
+// isValidComposeName 验证 compose 项目名称是否合法
+func isValidComposeName(name string) bool {
+	if name == "" || len(name) > 128 {
+		return false
+	}
+	// 只允许字母、数字、-、_
+	for _, c := range name {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') || c == '-' || c == '_') {
+			return false
+		}
+	}
+	return true
+}
+
 func (h *ComposeHandler) getComposeDir() string {
 	return filepath.Join(config.Get().DataDir, "compose")
 }
@@ -63,13 +78,20 @@ func getAllowedBaseDirs() []string {
 
 // validatePath 验证用户提供的路径是否在允许的目录内
 func validatePath(userPath string) (string, error) {
-	// 清理用户路径
 	cleaned := filepath.Clean(userPath)
 
-	// 检查路径是否在允许的基础目录内
+	resolved, err := filepath.EvalSymlinks(cleaned)
+	if err != nil {
+		return "", err
+	}
+
 	allowedDirs := getAllowedBaseDirs()
 	for _, baseDir := range allowedDirs {
-		if strings.HasPrefix(cleaned, baseDir) {
+		resolvedBase, err := filepath.EvalSymlinks(baseDir)
+		if err != nil {
+			continue
+		}
+		if strings.HasPrefix(resolved, resolvedBase) {
 			return cleaned, nil
 		}
 	}
@@ -213,6 +235,12 @@ func (h *ComposeHandler) Get(c *gin.Context) {
 	h.ensureDir()
 	name := c.Param("name")
 
+	// 安全验证：验证项目名称
+	if !isValidComposeName(name) {
+		response.BadRequest(c, "无效的项目名称")
+		return
+	}
+
 	var path string
 	var content []byte
 	var err error
@@ -322,7 +350,7 @@ func (h *ComposeHandler) Save(c *gin.Context) {
 	}
 
 	path := filepath.Join(h.getComposeDir(), req.Name+".yml")
-	if err := os.WriteFile(path, []byte(req.Content), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(req.Content), 0600); err != nil {
 		response.InternalError(c, "Failed to save file")
 		return
 	}
@@ -341,9 +369,25 @@ func (h *ComposeHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	path := filepath.Join(h.getComposeDir(), name+".yml")
+	// 使用安全路径
+	path, err := sanitizePath(h.getComposeDir(), name+".yml")
+	if err != nil {
+		response.BadRequest(c, "Invalid path")
+		return
+	}
+
+	// 检查 .yml 文件是否存在
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		path = filepath.Join(h.getComposeDir(), name+".yaml")
+		// 尝试 .yaml 文件
+		path, err = sanitizePath(h.getComposeDir(), name+".yaml")
+		if err != nil {
+			response.BadRequest(c, "Invalid path")
+			return
+		}
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			response.NotFound(c, "Compose file not found")
+			return
+		}
 	}
 
 	os.Remove(path)
@@ -353,6 +397,12 @@ func (h *ComposeHandler) Delete(c *gin.Context) {
 
 func (h *ComposeHandler) runCompose(c *gin.Context, name string, args ...string) (string, error) {
 	h.ensureDir()
+
+	// 安全验证：验证项目名称
+	if !isValidComposeName(name) {
+		return "", errors.New("无效的项目名称")
+	}
+
 	var path string
 
 	// 首先尝试从运行中的项目获取配置路径
@@ -379,11 +429,20 @@ func (h *ComposeHandler) runCompose(c *gin.Context, name string, args ...string)
 	}
 	cancel()
 
-	// 如果没有找到运行中的项目，尝试从本地目录查找
+	// 如果没有找到运行中的项目，尝试从本地目录查找（使用安全路径）
 	if path == "" {
-		path = filepath.Join(h.getComposeDir(), name+".yml")
+		var err error
+		path, err = sanitizePath(h.getComposeDir(), name+".yml")
+		if err != nil {
+			return "", err
+		}
+		// 检查 .yml 文件
 		if _, err := os.Stat(path); os.IsNotExist(err) {
-			path = filepath.Join(h.getComposeDir(), name+".yaml")
+			// 尝试 .yaml 文件
+			path, err = sanitizePath(h.getComposeDir(), name+".yaml")
+			if err != nil {
+				return "", err
+			}
 			if _, err := os.Stat(path); os.IsNotExist(err) {
 				return "", os.ErrNotExist
 			}
@@ -653,7 +712,7 @@ func (h *FileHandler) Write(c *gin.Context) {
 		return
 	}
 
-	if err := os.WriteFile(validatedPath, []byte(req.Content), 0644); err != nil {
+	if err := os.WriteFile(validatedPath, []byte(req.Content), 0600); err != nil {
 		response.DockerError(c, "Failed to write file", err.Error())
 		return
 	}
