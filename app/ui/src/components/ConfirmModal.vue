@@ -5,8 +5,8 @@
         <h3 class="dialog-title">{{ title }}</h3>
         <button class="dialog-close" @click="$emit('close')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -14,8 +14,12 @@
         <p class="dialog-message">{{ message }}</p>
       </div>
       <div class="dialog-footer">
-        <button class="dialog-btn secondary" @click="$emit('close')">{{ cancelText || t('common.cancel') }}</button>
-        <button class="dialog-btn" :class="danger ? 'danger' : 'primary'" @click="$emit('confirm')">{{ confirmText || t('common.confirm') }}</button>
+        <button class="dialog-btn secondary" @click="$emit('close')">
+          {{ cancelText || t('common.cancel') }}
+        </button>
+        <button class="dialog-btn" :class="danger ? 'danger' : 'primary'" @click="$emit('confirm')">
+          {{ confirmText || t('common.confirm') }}
+        </button>
       </div>
     </div>
   </div>
@@ -54,8 +58,12 @@ defineEmits(['close', 'confirm'])
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .dialog {
@@ -69,11 +77,11 @@ defineEmits(['close', 'confirm'])
 }
 
 @keyframes slideUp {
-  from { 
+  from {
     opacity: 0;
     transform: translateY(20px);
   }
-  to { 
+  to {
     opacity: 1;
     transform: translateY(0);
   }
@@ -146,21 +154,21 @@ defineEmits(['close', 'confirm'])
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
 .dialog-btn.primary:hover {
-  background: #0066CC;
+  background: #0066cc;
 }
 
 .dialog-btn.danger {
-  background: #FA2A2D;
+  background: #fa2a2d;
   color: white;
 }
 
 .dialog-btn.danger:hover {
-  background: #E02626;
+  background: #e02626;
 }
 
 .dialog-btn.secondary {

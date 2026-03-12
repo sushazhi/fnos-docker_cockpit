@@ -13,12 +13,14 @@
         <div class="form-field">
           <label class="form-label">{{ t('setup.password') }}</label>
           <input type="password" class="form-input" v-model="form.password" />
-          <p class="field-hint" :class="{ 'error': passwordError }">{{ passwordHint }}</p>
+          <p class="field-hint" :class="{ error: passwordError }">{{ passwordHint }}</p>
         </div>
         <div class="form-field">
           <label class="form-label">{{ t('setup.confirmPassword') }}</label>
           <input type="password" class="form-input" v-model="form.confirmPassword" />
-          <p class="field-hint" :class="{ 'error': confirmPasswordError }" v-if="confirmPasswordHint">{{ confirmPasswordHint }}</p>
+          <p class="field-hint" :class="{ error: confirmPasswordError }" v-if="confirmPasswordHint">
+            {{ confirmPasswordHint }}
+          </p>
         </div>
       </div>
       <div class="dialog-footer">
@@ -64,9 +66,11 @@ const confirmPasswordHint = computed(() => {
 })
 
 const isValid = computed(() => {
-  return form.value.username && 
-         form.value.password.length >= 8 && 
-         form.value.password === form.value.confirmPassword
+  return (
+    form.value.username &&
+    form.value.password.length >= 8 &&
+    form.value.password === form.value.confirmPassword
+  )
 })
 
 async function setup() {
@@ -170,7 +174,7 @@ async function setup() {
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -199,7 +203,7 @@ async function setup() {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 

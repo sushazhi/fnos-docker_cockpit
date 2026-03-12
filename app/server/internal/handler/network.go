@@ -4,7 +4,6 @@ import (
 	"dockpit/pkg/docker"
 	"dockpit/pkg/response"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +29,7 @@ func (h *NetworkHandler) List(c *gin.Context) {
 	}
 
 	type NetworkWithContainers struct {
-		types.NetworkResource
+		network.Inspect
 		ContainerCount int `json:"ContainerCount"`
 	}
 
@@ -46,8 +45,8 @@ func (h *NetworkHandler) List(c *gin.Context) {
 			}
 		}
 		result[i] = NetworkWithContainers{
-			NetworkResource: net,
-			ContainerCount:  containerCount,
+			Inspect:        net,
+			ContainerCount: containerCount,
 		}
 	}
 
@@ -88,7 +87,7 @@ func (h *NetworkHandler) Create(c *gin.Context) {
 		return
 	}
 
-	opts := types.NetworkCreate{
+	opts := network.CreateOptions{
 		Driver:     req.Driver,
 		Internal:   req.Internal,
 		Attachable: req.Attachable,

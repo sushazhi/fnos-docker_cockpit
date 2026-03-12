@@ -1,6 +1,6 @@
 /**
  * Dockpit 更新检测 Composable
- * 
+ *
  * 功能：
  * 1. 后台自动检测 GitHub 最新版本（24小时一次）
  * 2. 比较版本号判断是否有更新
@@ -84,13 +84,13 @@ export function useUpdateCheck(currentVersion: string = '1.0.0'): UseUpdateCheck
   function compareVersions(current: string, latest: string): number {
     const cur = (current || '').split('.').map(n => parseInt(n, 10) || 0)
     const lat = (latest || '').split('.').map(n => parseInt(n, 10) || 0)
-    
+
     const minLen = Math.min(cur.length, lat.length)
     for (let i = 0; i < minLen; i++) {
       if (lat[i] > cur[i]) return 1
       if (lat[i] < cur[i]) return -1
     }
-    
+
     if (lat.length > cur.length) return 1
     if (cur.length > lat.length) return -1
     return 0
@@ -110,10 +110,13 @@ export function useUpdateCheck(currentVersion: string = '1.0.0'): UseUpdateCheck
     }
 
     try {
-      const response = await fetch('https://api.github.com/repos/sushazhi/fnos-docker_cockpit/releases/latest', {
-        headers: { 'Accept': 'application/vnd.github.v3+json' },
-        cache: 'no-store'
-      })
+      const response = await fetch(
+        'https://api.github.com/repos/sushazhi/fnos-docker_cockpit/releases/latest',
+        {
+          headers: { Accept: 'application/vnd.github.v3+json' },
+          cache: 'no-store'
+        }
+      )
 
       if (!response.ok) throw new Error('HTTP ' + response.status)
 
@@ -145,7 +148,10 @@ export function useUpdateCheck(currentVersion: string = '1.0.0'): UseUpdateCheck
         console.log('[Dockpit] 当前已是最新版本')
       }
     } catch (error) {
-      console.error('[Dockpit] 检查更新失败:', error instanceof Error ? error.message : 'Unknown error')
+      console.error(
+        '[Dockpit] 检查更新失败:',
+        error instanceof Error ? error.message : 'Unknown error'
+      )
     }
   }
 

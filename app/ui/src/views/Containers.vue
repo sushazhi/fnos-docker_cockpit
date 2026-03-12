@@ -3,52 +3,65 @@
     <div class="header">
       <button class="header-back" @click="$router.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <span class="header-title">{{ t('containers.title') }}</span>
       <button class="header-action" @click="refresh(true)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 4 23 10 17 10"/>
-          <polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
       </button>
     </div>
-    
+
     <div class="tabs-container">
       <div class="tabs">
-        <button class="tab" :class="{ active: filter === 'all' }" @click="filter = 'all'">{{ t('containers.all') }}</button>
-        <button class="tab" :class="{ active: filter === 'running' }" @click="filter = 'running'">{{ t('containers.running') }}</button>
-        <button class="tab" :class="{ active: filter === 'stopped' }" @click="filter = 'stopped'">{{ t('containers.stopped') }}</button>
+        <button class="tab" :class="{ active: filter === 'all' }" @click="filter = 'all'">
+          {{ t('containers.all') }}
+        </button>
+        <button class="tab" :class="{ active: filter === 'running' }" @click="filter = 'running'">
+          {{ t('containers.running') }}
+        </button>
+        <button class="tab" :class="{ active: filter === 'stopped' }" @click="filter = 'stopped'">
+          {{ t('containers.stopped') }}
+        </button>
       </div>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <div v-else-if="filteredContainers.length === 0" class="empty-state">
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
         </svg>
       </div>
       <div class="empty-text">{{ t('common.noData') }}</div>
     </div>
-    
+
     <div v-else class="list-card">
-      <div 
-        v-for="c in filteredContainers" 
-        :key="c.Id" 
+      <div
+        v-for="c in filteredContainers"
+        :key="c.Id"
         class="list-item"
         @click="$router.push(`/container/${c.Id}`)"
       >
         <div class="item-icon" :class="getIconClass(c.State)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
           </svg>
         </div>
         <div class="item-content">
@@ -58,15 +71,19 @@
         <span class="badge" :class="getStatusClass(c.State)">{{ getStatusText(c.State) }}</span>
       </div>
     </div>
-    
+
     <button class="fab" @click="showCreateModal = true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
     </button>
-    
-    <CreateContainerModal v-if="showCreateModal" @close="showCreateModal = false" @created="handleCreated" />
+
+    <CreateContainerModal
+      v-if="showCreateModal"
+      @close="showCreateModal = false"
+      @created="handleCreated"
+    />
   </div>
 </template>
 
@@ -80,7 +97,7 @@ import CreateContainerModal from '../components/CreateContainerModal.vue'
 
 const { t } = useI18n()
 const route = useRoute()
-const showToast = inject('showToast')
+const _showToast = inject('showToast')
 
 const loading = ref(true)
 const containers = ref([])
@@ -105,19 +122,27 @@ const filteredContainers = computed(() => {
 
 function getStatusClass(state) {
   switch (state) {
-    case 'running': return 'badge-success'
-    case 'paused': return 'badge-warning'
-    case 'exited': return 'badge-danger'
-    default: return 'badge-info'
+    case 'running':
+      return 'badge-success'
+    case 'paused':
+      return 'badge-warning'
+    case 'exited':
+      return 'badge-danger'
+    default:
+      return 'badge-info'
   }
 }
 
 function getIconClass(state) {
   switch (state) {
-    case 'running': return 'icon-running'
-    case 'paused': return 'icon-paused'
-    case 'exited': return 'icon-stopped'
-    default: return 'icon-default'
+    case 'running':
+      return 'icon-running'
+    case 'paused':
+      return 'icon-paused'
+    case 'exited':
+      return 'icon-stopped'
+    default:
+      return 'icon-default'
   }
 }
 
@@ -167,7 +192,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .tabs {
+[data-theme='dark'] .tabs {
   box-shadow: none;
 }
 
@@ -186,7 +211,7 @@ onMounted(() => {
 }
 
 .tab.active {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
@@ -198,7 +223,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .list-card {
+[data-theme='dark'] .list-card {
   box-shadow: none;
 }
 
@@ -240,22 +265,22 @@ onMounted(() => {
 
 .item-icon.icon-running {
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
 }
 
 .item-icon.icon-paused {
   background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .item-icon.icon-stopped {
   background: rgba(250, 42, 45, 0.1);
-  color: #FA2A2D;
+  color: #fa2a2d;
 }
 
 .item-icon.icon-default {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .item-content {

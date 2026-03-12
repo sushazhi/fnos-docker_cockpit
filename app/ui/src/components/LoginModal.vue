@@ -5,8 +5,8 @@
         <h3 class="dialog-title">{{ t('auth.login') }}</h3>
         <button class="dialog-close" @click="$emit('close')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -26,13 +26,21 @@
               @click="showPassword = !showPassword"
               :aria-label="showPassword ? t('auth.hidePassword') : t('auth.showPassword')"
             >
-              <svg v-if="showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
+              <svg
+                v-if="showPassword"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                />
+                <line x1="1" y1="1" x2="23" y2="23" />
               </svg>
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
               </svg>
             </button>
           </div>
@@ -40,8 +48,14 @@
         <div class="form-field remember-field">
           <label class="checkbox-item" @click="rememberPassword = !rememberPassword">
             <div class="checkbox" :class="{ checked: rememberPassword }">
-              <svg v-if="rememberPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"/>
+              <svg
+                v-if="rememberPassword"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+              >
+                <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
             <span class="checkbox-label">{{ t('auth.rememberPassword') }}</span>
@@ -79,7 +93,10 @@ function encodePassword(password) {
     // 使用 base64 编码 + 简单的字符替换
     const encoded = btoa(encodeURIComponent(password))
     // 字符替换增加混淆
-    return encoded.split('').map(c => String.fromCharCode(c.charCodeAt(0) + 1)).join('')
+    return encoded
+      .split('')
+      .map(c => String.fromCharCode(c.charCodeAt(0) + 1))
+      .join('')
   } catch {
     return ''
   }
@@ -88,7 +105,10 @@ function encodePassword(password) {
 function decodePassword(encoded) {
   try {
     // 反向字符替换
-    const decoded = encoded.split('').map(c => String.fromCharCode(c.charCodeAt(0) - 1)).join('')
+    const decoded = encoded
+      .split('')
+      .map(c => String.fromCharCode(c.charCodeAt(0) - 1))
+      .join('')
     return decodeURIComponent(atob(decoded))
   } catch {
     return ''
@@ -108,7 +128,7 @@ onMounted(() => {
       // 解析失败，忽略
     }
   }
-  
+
   // 如果 sessionStorage 没有，尝试从 localStorage 读取（持久存储）
   const savedPassword = localStorage.getItem('dockpit_remembered_password')
   if (savedPassword) {
@@ -126,7 +146,7 @@ async function login() {
   logging.value = true
   try {
     await api.post('/api/auth/login', { password: form.value.password })
-    
+
     // 保存或清除密码
     if (rememberPassword.value) {
       const encoded = encodePassword(form.value.password)
@@ -137,7 +157,7 @@ async function login() {
       sessionStorage.removeItem('dockpit_session_password')
       localStorage.removeItem('dockpit_remembered_password')
     }
-    
+
     emit('success')
   } catch (e) {
     // 显示具体的错误信息
@@ -238,7 +258,7 @@ async function login() {
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -275,7 +295,7 @@ async function login() {
 }
 
 .password-toggle-btn:active {
-  color: #007DFF;
+  color: #007dff;
 }
 
 .password-toggle-btn svg {
@@ -310,8 +330,8 @@ async function login() {
 }
 
 .checkbox.checked {
-  background: #007DFF;
-  border-color: #007DFF;
+  background: #007dff;
+  border-color: #007dff;
 }
 
 .checkbox svg {
@@ -340,7 +360,7 @@ async function login() {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 

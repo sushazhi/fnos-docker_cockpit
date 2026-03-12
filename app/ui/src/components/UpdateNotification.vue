@@ -4,18 +4,18 @@
       <div v-if="show" class="update-notification-overlay" @click.self="close">
         <div class="update-notification">
           <button class="update-close" @click="close">&times;</button>
-          
+
           <div class="update-header">
             <div class="update-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
             </div>
             <div class="update-title">{{ t('settings.updateAvailable') }}</div>
           </div>
-          
+
           <div class="update-version">
             <span class="version-label">{{ t('settings.currentVersion') }}:</span>
             <span class="version-value">v{{ currentVersion }}</span>
@@ -23,16 +23,14 @@
             <span class="version-label">{{ t('settings.latestVersion') }}:</span>
             <span class="version-value new">v{{ latestVersion }}</span>
           </div>
-          
+
           <div v-if="changelog" class="update-changelog">
             <div class="changelog-title">更新内容</div>
             <div class="changelog-content">{{ changelog }}</div>
           </div>
-          
+
           <div class="update-actions">
-            <button class="update-btn secondary" @click="ignore">
-              忽略此版本
-            </button>
+            <button class="update-btn secondary" @click="ignore">忽略此版本</button>
             <a :href="releaseUrl" target="_blank" class="update-btn primary" @click="close">
               {{ t('settings.downloadUpdate') }}
             </a>
@@ -44,10 +42,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+// import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const props = defineProps({
+const _props = defineProps({
   show: {
     type: Boolean,
     default: false
@@ -233,7 +231,7 @@ function ignore() {
 }
 
 .update-btn.primary {
-  background: linear-gradient(135deg, #007DFF 0%, #0066CC 100%);
+  background: linear-gradient(135deg, #007dff 0%, #0066cc 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(0, 125, 255, 0.3);
 }

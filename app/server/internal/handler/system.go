@@ -12,6 +12,7 @@ import (
 	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/system"
 	"github.com/gin-gonic/gin"
+	"runtime/debug"
 )
 
 type SystemHandler struct {
@@ -259,8 +260,22 @@ func (h *SystemHandler) Events(c *gin.Context) {
 	}
 }
 
-// Docker SDK 版本信息（编译时注入）
-var dockerSDKVersion = "v27.5.1"
+// getDockerSDKVersion 从构建信息中获取 Docker SDK 版本
+func getDockerSDKVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "unknown"
+	}
+
+	// 查找 docker/docker 依赖
+	for _, dep := range info.Deps {
+		if dep.Path == "github.com/docker/docker" {
+			return dep.Version
+		}
+	}
+
+	return "unknown"
+}
 
 // AppInfo 返回应用信息，包括 Docker SDK 版本
 // 版本号通过 ldflags 在构建时注入: -ldflags "-X dockpit/internal/handler.appVersion=1.0.0"
@@ -269,7 +284,7 @@ var appVersion = "1.0.0" // 默认值，构建时会被覆盖
 func (h *SystemHandler) AppInfo(c *gin.Context) {
 	response.Success(c, gin.H{
 		"version":          appVersion,
-		"dockerSDKVersion": dockerSDKVersion,
+		"dockerSDKVersion": getDockerSDKVersion(),
 		"goVersion":        runtime.Version(),
 		"platform":         runtime.GOOS + "/" + runtime.GOARCH,
 	})

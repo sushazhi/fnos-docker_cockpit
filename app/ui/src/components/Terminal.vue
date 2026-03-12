@@ -4,15 +4,20 @@
       <div class="toolbar-left">
         <button class="toolbar-btn" @click="createTerminal" :disabled="loading || isConnected">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="4 17 10 11 4 5"/>
-            <line x1="12" y1="19" x2="20" y2="19"/>
+            <polyline points="4 17 10 11 4 5" />
+            <line x1="12" y1="19" x2="20" y2="19" />
           </svg>
           {{ loading ? '...' : connectText }}
         </button>
-        <button v-if="isConnected" class="toolbar-btn danger" @click="disconnect" :disabled="loading">
+        <button
+          v-if="isConnected"
+          class="toolbar-btn danger"
+          @click="disconnect"
+          :disabled="loading"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
           断开连接
         </button>
@@ -96,7 +101,8 @@ async function createTerminal() {
           brightCyan: '#29b8db',
           brightWhite: '#e5e5e5'
         },
-        fontFamily: '"HarmonyOS Sans SC", "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace',
+        fontFamily:
+          '"HarmonyOS Sans SC", "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace',
         fontSize: 13,
         lineHeight: 1.4,
         cursorBlink: true,
@@ -105,11 +111,11 @@ async function createTerminal() {
         tabStopWidth: 4,
         bellStyle: 'none'
       })
-      
+
       fitAddon = new FitAddon()
       terminal.loadAddon(fitAddon)
       terminal.loadAddon(new WebLinksAddon())
-      
+
       terminal.open(terminalContainer.value)
       fitAddon.fit()
 
@@ -135,7 +141,7 @@ async function createTerminal() {
       }, 100)
     }
 
-    ws.onmessage = (event) => {
+    ws.onmessage = event => {
       if (terminal) {
         terminal.write(event.data)
       }
@@ -156,12 +162,11 @@ async function createTerminal() {
     }
 
     // 添加新的数据监听器
-    dataDisposable = terminal.onData((data) => {
+    dataDisposable = terminal.onData(data => {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(data)
       }
     })
-    
   } catch (e) {
     emit('error', e.message || '连接终端失败')
   } finally {
@@ -256,7 +261,7 @@ defineExpose({
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .terminal-wrapper {
+[data-theme='dark'] .terminal-wrapper {
   box-shadow: none;
 }
 

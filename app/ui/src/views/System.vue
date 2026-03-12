@@ -3,22 +3,22 @@
     <div class="header">
       <button class="header-back" @click="$router.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <span class="header-title">{{ t('system.title') }}</span>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <template v-else>
       <div class="section-header">
         <div class="section-icon docker">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
           </svg>
         </div>
         <div class="section-info">
@@ -55,12 +55,12 @@
           <span class="info-value">{{ formatMemory(systemMemory) }}</span>
         </div>
       </div>
-      
+
       <div class="section-header">
         <div class="section-icon containers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
           </svg>
         </div>
         <div class="section-info">
@@ -87,13 +87,13 @@
           </div>
         </div>
       </div>
-      
+
       <div class="section-header">
         <div class="section-icon images">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
           </svg>
         </div>
         <div class="section-info">
@@ -110,13 +110,13 @@
           <span class="info-value">{{ formatMemory(disk.ImagesSize) }}</span>
         </div>
       </div>
-      
+
       <div class="section-header">
         <div class="section-icon disk">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <ellipse cx="12" cy="5" rx="9" ry="3"/>
-            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            <ellipse cx="12" cy="5" rx="9" ry="3" />
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
           </svg>
         </div>
         <div class="section-info">
@@ -145,11 +145,11 @@
           <span class="info-value">{{ formatMemory(disk.TotalSize) }}</span>
         </div>
       </div>
-      
+
       <div class="section-header">
         <div class="section-icon storage">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
           </svg>
         </div>
         <div class="section-info">
@@ -194,7 +194,9 @@ const systemMemory = computed(() => {
     return hostMemory.value.total
   }
   // 降级使用 Docker 返回的内存信息
-  return info.value.MemTotal || info.value.MemoryTotal || info.value.mem_total || info.value.memory || 0
+  return (
+    info.value.MemTotal || info.value.MemoryTotal || info.value.mem_total || info.value.memory || 0
+  )
 })
 
 function formatMemory(bytes) {
@@ -308,7 +310,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .info-card {
+[data-theme='dark'] .info-card {
   box-shadow: none;
 }
 
@@ -350,7 +352,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .stats-card {
+[data-theme='dark'] .stats-card {
   box-shadow: none;
 }
 
@@ -371,15 +373,15 @@ onMounted(() => {
 }
 
 .stat-value.running {
-  color: #00C853;
+  color: #00c853;
 }
 
 .stat-value.stopped {
-  color: #FA2A2D;
+  color: #fa2a2d;
 }
 
 .stat-value.paused {
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .stat-label {

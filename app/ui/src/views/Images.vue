@@ -3,61 +3,73 @@
     <div class="header">
       <button class="header-back" @click="$router.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <span class="header-title">{{ t('images.title') }}</span>
       <button class="header-action" @click="refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"/>
-          <polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
       </button>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <div v-else-if="images.length === 0" class="empty-state">
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-          <circle cx="8.5" cy="8.5" r="1.5"/>
-          <polyline points="21 15 16 10 5 21"/>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
         </svg>
       </div>
       <div class="empty-text">{{ t('common.noData') }}</div>
     </div>
-    
+
     <!-- 正在拉取的镜像列表 -->
     <div v-if="pullingImages.length > 0" class="list-card pulling-section">
       <div class="section-header">正在拉取</div>
-      <div 
-        v-for="item in pullingImages" 
-        :key="item.name" 
-        class="list-item pulling-item"
-      >
+      <div v-for="item in pullingImages" :key="item.name" class="list-item pulling-item">
         <div class="item-icon pulling-icon">
-          <svg v-if="item.status === 'pulling'" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
+          <svg
+            v-if="item.status === 'pulling'"
+            class="spin"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
           </svg>
-          <svg v-else-if="item.status === 'success'" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
-            <polyline points="20 6 9 17 4 12"/>
+          <svg
+            v-else-if="item.status === 'success'"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#10b981"
+            stroke-width="2"
+          >
+            <polyline points="20 6 9 17 4 12" />
           </svg>
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
           </svg>
         </div>
         <div class="item-content">
           <div class="item-title">{{ item.name }}</div>
           <div class="item-subtitle">{{ item.progress }}</div>
           <!-- 进度条 -->
-          <div v-if="item.status === 'pulling' && item.percent !== undefined" class="progress-bar-container">
+          <div
+            v-if="item.status === 'pulling' && item.percent !== undefined"
+            class="progress-bar-container"
+          >
             <div class="progress-bar" :style="{ width: item.percent + '%' }"></div>
             <span class="progress-text">{{ item.percent }}%</span>
           </div>
@@ -66,46 +78,48 @@
     </div>
 
     <div v-else class="list-card">
-      <div 
-        v-for="img in images" 
-        :key="img.Id" 
-        class="list-item"
-        @click="showImageActions(img)"
-      >
+      <div v-for="img in images" :key="img.Id" class="list-item" @click="showImageActions(img)">
         <div class="item-icon image-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
           </svg>
         </div>
         <div class="item-content">
           <div class="item-title-row">
             <span class="item-title">{{ getImageName(img) }}</span>
-            <span v-if="getContainerCount(img) > 0" class="in-use-badge">使用中 ({{ getContainerCount(img) }})</span>
-            <span v-else class="in-use-badge" style="background: #999;">未使用</span>
-            <span v-if="img.hasUpdate" class="update-badge" @click.stop="updateImage(img)">{{ t('images.canUpdate') }}</span>
+            <span v-if="getContainerCount(img) > 0" class="in-use-badge">
+              使用中 ({{ getContainerCount(img) }})
+            </span>
+            <span v-else class="in-use-badge" style="background: #999">未使用</span>
+            <span v-if="img.hasUpdate" class="update-badge" @click.stop="updateImage(img)">
+              {{ t('images.canUpdate') }}
+            </span>
           </div>
-          <div class="item-subtitle">{{ img.Id?.substring(7, 19) }} · {{ formatSize(img.Size) }} · {{ formatDate(img.Created) }}</div>
+          <div class="item-subtitle">
+            {{ img.Id?.substring(7, 19) }} · {{ formatSize(img.Size) }} ·
+            {{ formatDate(img.Created) }}
+          </div>
         </div>
         <div class="item-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6"/>
+            <polyline points="9 18 15 12 9 6" />
           </svg>
         </div>
       </div>
     </div>
-    
+
     <!-- 底部操作按钮组 -->
     <div class="fab-container">
       <button class="fab" @click="showPullModal = true" :title="t('images.pull')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </button>
     </div>
-    
+
     <!-- 拉取镜像模态框 -->
     <div v-if="showPullModal" class="dialog-overlay" @click.self="showPullModal = false">
       <div class="dialog">
@@ -113,8 +127,8 @@
           <h3 class="dialog-title">{{ t('images.pull') }}</h3>
           <button class="dialog-close" @click="showPullModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -158,8 +172,14 @@
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn secondary" @click="showPullModal = false">{{ t('common.cancel') }}</button>
-          <button class="dialog-btn primary" @click="pullImage" :disabled="pulling || !pullImageName">
+          <button class="dialog-btn secondary" @click="showPullModal = false">
+            {{ t('common.cancel') }}
+          </button>
+          <button
+            class="dialog-btn primary"
+            @click="pullImage"
+            :disabled="pulling || !pullImageName"
+          >
             {{ t('images.pull') }}
           </button>
         </div>
@@ -173,8 +193,8 @@
           <h3 class="dialog-title">{{ t('images.build') }}</h3>
           <button class="dialog-close" @click="showBuildModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -202,12 +222,7 @@
 
           <div class="form-field">
             <label class="form-label">构建上下文</label>
-            <input
-              type="text"
-              class="form-input"
-              v-model="BuildContext"
-              placeholder="."
-            />
+            <input type="text" class="form-input" v-model="BuildContext" placeholder="." />
             <div class="form-hint">构建上下文目录,默认为当前目录</div>
           </div>
 
@@ -217,8 +232,14 @@
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn secondary" @click="showBuildModal = false">{{ t('common.cancel') }}</button>
-          <button class="dialog-btn primary" @click="buildImage" :disabled="building || !buildImageName">
+          <button class="dialog-btn secondary" @click="showBuildModal = false">
+            {{ t('common.cancel') }}
+          </button>
+          <button
+            class="dialog-btn primary"
+            @click="buildImage"
+            :disabled="building || !buildImageName"
+          >
             {{ t('images.build') }}
           </button>
         </div>
@@ -231,49 +252,59 @@
         <div class="action-sheet-content">
           <button class="sheet-btn" @click="createContainer">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
             </svg>
             {{ t('images.createContainer') }}
           </button>
           <button class="sheet-btn" @click="showEditTagsDialog">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-              <line x1="7" y1="7" x2="7.01" y2="7"/>
+              <path
+                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+              />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
             </svg>
             编辑标签
           </button>
           <button class="sheet-btn" @click="showDetectUpgradeDialog">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             检测升级
           </button>
-          <button v-if="selectedImage?.hasUpdate" class="sheet-btn update" @click="updateSelectedImage">
+          <button
+            v-if="selectedImage?.hasUpdate"
+            class="sheet-btn update"
+            @click="updateSelectedImage"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             {{ t('images.update') }}
           </button>
           <button class="sheet-btn danger" @click="confirmRemove">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <polyline points="3 6 5 6 21 6" />
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              />
             </svg>
             {{ t('images.remove') }}
           </button>
         </div>
       </div>
     </div>
-    
+
     <ConfirmModal
       v-if="showConfirm"
       :title="t('images.remove')"
-      :message="t('common.confirmDelete') + ' ' + (selectedImage ? getImageName(selectedImage) : '') + '?'"
+      :message="
+        t('common.confirmDelete') + ' ' + (selectedImage ? getImageName(selectedImage) : '') + '?'
+      "
       :confirm-text="t('images.remove')"
       danger
       @close="showConfirm = false"
@@ -287,8 +318,8 @@
           <h3 class="dialog-title">编辑标签</h3>
           <button class="dialog-close" @click="showEditTagsModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -305,7 +336,15 @@
             <label class="form-label">新标签</label>
             <input type="text" class="form-input" v-model="editTagsTag" placeholder="latest" />
           </div>
-          <div class="form-hint" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-top: 16px;">
+          <div
+            class="form-hint"
+            style="
+              background: var(--bg-secondary);
+              padding: 12px;
+              border-radius: 8px;
+              margin-top: 16px;
+            "
+          >
             编辑标签会创建新标签并删除旧标签。如果新旧标签相同则不会进行任何操作。
           </div>
         </div>
@@ -325,8 +364,8 @@
           <h3 class="dialog-title">检测升级: {{ detectUpgradeImageName }}</h3>
           <button class="dialog-close" @click="closeDetectUpgrade">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -344,7 +383,12 @@
 
           <!-- 检测步骤 -->
           <div class="upgrade-steps">
-            <div v-for="(step, index) in detectUpgradeSteps" :key="index" class="upgrade-step" :class="{ active: step.active, completed: step.completed }">
+            <div
+              v-for="(step, index) in detectUpgradeSteps"
+              :key="index"
+              class="upgrade-step"
+              :class="{ active: step.active, completed: step.completed }"
+            >
               <div class="step-indicator">
                 <span v-if="step.completed" class="step-check">✓</span>
                 <span v-else class="step-number">{{ index + 1 }}</span>
@@ -361,10 +405,18 @@
           </div>
 
           <!-- 可升级版本列表 -->
-          <div v-if="!detectUpgradeLoading && upgradableVersions.length > 0" class="upgrade-versions">
+          <div
+            v-if="!detectUpgradeLoading && upgradableVersions.length > 0"
+            class="upgrade-versions"
+          >
             <h4 class="versions-title">可升级版本</h4>
             <div class="versions-list">
-              <div v-for="version in upgradableVersions" :key="version" class="version-item" @click="upgradeToVersion(version)">
+              <div
+                v-for="version in upgradableVersions"
+                :key="version"
+                class="version-item"
+                @click="upgradeToVersion(version)"
+              >
                 <span class="version-name">{{ version }}</span>
                 <button class="version-upgrade-btn">升级</button>
               </div>
@@ -372,11 +424,14 @@
           </div>
 
           <!-- 无可用升级 -->
-          <div v-if="!detectUpgradeLoading && detectUpgradeComplete && upgradableVersions.length === 0" class="upgrade-empty">
+          <div
+            v-if="!detectUpgradeLoading && detectUpgradeComplete && upgradableVersions.length === 0"
+            class="upgrade-empty"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <span>当前已是最新版本</span>
           </div>
@@ -435,10 +490,38 @@ const detectUpgradePercent = ref(0)
 const detectUpgradeStep = ref('')
 const upgradableVersions = ref([])
 const detectUpgradeSteps = ref([
-  { title: '准备中...', desc: '开始镜像升级检测...', percent: 5, time: '', active: true, completed: false },
-  { title: '获取本地镜像信息...', desc: '获取本地镜像信息...', percent: 15, time: '', active: false, completed: false },
-  { title: '统计使用此镜像的容器...', desc: '统计使用此镜像的容器...', percent: 25, time: '', active: false, completed: false },
-  { title: '检查远程镜像版本...', desc: '检查远程镜像版本...', percent: 40, time: '', active: false, completed: false }
+  {
+    title: '准备中...',
+    desc: '开始镜像升级检测...',
+    percent: 5,
+    time: '',
+    active: true,
+    completed: false
+  },
+  {
+    title: '获取本地镜像信息...',
+    desc: '获取本地镜像信息...',
+    percent: 15,
+    time: '',
+    active: false,
+    completed: false
+  },
+  {
+    title: '统计使用此镜像的容器...',
+    desc: '统计使用此镜像的容器...',
+    percent: 25,
+    time: '',
+    active: false,
+    completed: false
+  },
+  {
+    title: '检查远程镜像版本...',
+    desc: '检查远程镜像版本...',
+    percent: 40,
+    time: '',
+    active: false,
+    completed: false
+  }
 ])
 
 function getImageName(img) {
@@ -498,12 +581,14 @@ function formatDate(timestamp) {
   const now = new Date()
   const diff = now - date
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
+
   if (days === 0) {
     const hours = Math.floor(diff / (1000 * 60 * 60))
     if (hours === 0) {
       const minutes = Math.floor(diff / (1000 * 60))
-      return minutes <= 1 ? t('images.justNow') : `${minutes}${t('images.minutesAgo').replace('{n}', '')}`
+      return minutes <= 1
+        ? t('images.justNow')
+        : `${minutes}${t('images.minutesAgo').replace('{n}', '')}`
     }
     return hours === 1 ? t('images.hourAgo') : `${hours}${t('images.hoursAgo').replace('{n}', '')}`
   } else if (days === 1) {
@@ -512,7 +597,11 @@ function formatDate(timestamp) {
     return `${days}${t('images.daysAgoText')}`
   } else {
     // 显示完整的日期时间，格式：2026/2/24 15:30
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return (
+      date.toLocaleDateString() +
+      ' ' +
+      date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    )
   }
 }
 
@@ -640,7 +729,7 @@ async function pullImageAsync(payload, pullingImage) {
     const eventSource = new EventSource(`/api/image/pull-stream?${params}`)
 
     // 监听进度事件
-    eventSource.addEventListener('progress', (event) => {
+    eventSource.addEventListener('progress', (/* event */) => {
       const data = JSON.parse(event.data)
       // 解析进度信息
       try {
@@ -665,7 +754,7 @@ async function pullImageAsync(payload, pullingImage) {
     })
 
     // 监听错误事件
-    eventSource.addEventListener('error', (event) => {
+    eventSource.addEventListener('error', (/* event */) => {
       const data = JSON.parse(event.data)
       pullingImage.status = 'error'
       pullingImage.progress = '拉取失败'
@@ -674,7 +763,7 @@ async function pullImageAsync(payload, pullingImage) {
     })
 
     // 监听完成事件
-    eventSource.addEventListener('complete', (event) => {
+    eventSource.addEventListener('complete', (/* event */) => {
       pullingImage.status = 'success'
       pullingImage.progress = '拉取完成'
       pullingImage.percent = 100
@@ -691,7 +780,7 @@ async function pullImageAsync(payload, pullingImage) {
       }, 3000)
     })
 
-    eventSource.onerror = (error) => {
+    eventSource.onerror = error => {
       console.error('SSE error:', error)
       pullingImage.status = 'error'
       pullingImage.progress = '连接失败'
@@ -787,7 +876,9 @@ async function updateSelectedImage() {
     let registry = localStorage.getItem('docker_registry_mirror') || ''
     registry = registry.replace(/[`'"]/g, '').trim()
 
-    await api.post(`/api/image/${selectedImage.value.Id}/update`, { registry: registry || undefined })
+    await api.post(`/api/image/${selectedImage.value.Id}/update`, {
+      registry: registry || undefined
+    })
     showToast(t('images.updateSuccess'))
     refresh()
   } catch (e) {
@@ -830,7 +921,7 @@ async function saveEditTags() {
         cleanRepo = cleanRepo.substring(cleanRegistry.length + 1)
       }
     }
-    
+
     const newTag = `${cleanRepo}:${editTagsTag.value.trim()}`
     await api.post(`/api/image/${selectedImage.value.Id}/edit-tags`, {
       tags: [newTag]
@@ -924,7 +1015,6 @@ async function detectUpgrade() {
 
     detectUpgradeComplete.value = true
     detectUpgradeLoading.value = false
-
   } catch (e) {
     showToast('检测升级失败: ' + e.message)
     detectUpgradeLoading.value = false
@@ -954,9 +1044,8 @@ async function upgradeToVersion(version) {
     // 获取使用该镜像的容器
     const containersData = await api.get('/api/containers')
     const containers = containersData.containers || []
-    const usingContainers = containers.filter(container => 
-      container.Image === oldImageName || 
-      container.ImageID === selectedImage.value.Id
+    const usingContainers = containers.filter(
+      container => container.Image === oldImageName || container.ImageID === selectedImage.value.Id
     )
 
     // 重启使用该镜像的容器
@@ -1010,7 +1099,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .list-card {
+[data-theme='dark'] .list-card {
   box-shadow: none;
 }
 
@@ -1078,7 +1167,7 @@ onMounted(() => {
   font-size: 11px;
   font-weight: 500;
   color: #fff;
-  background: #007DFF;
+  background: #007dff;
   padding: 2px 8px;
   border-radius: 10px;
   white-space: nowrap;
@@ -1240,7 +1329,7 @@ onMounted(() => {
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -1280,7 +1369,7 @@ onMounted(() => {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
@@ -1347,7 +1436,7 @@ onMounted(() => {
 }
 
 .sheet-btn.danger {
-  color: #FA2A2D;
+  color: #fa2a2d;
 }
 
 .sheet-btn.update {
@@ -1371,7 +1460,7 @@ onMounted(() => {
   width: 56px;
   height: 56px;
   padding: 0;
-  background: #007DFF;
+  background: #007dff;
   color: white;
   border: none;
   border-radius: 50%;
@@ -1408,7 +1497,7 @@ onMounted(() => {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #007DFF, #00C6FF);
+  background: linear-gradient(90deg, #007dff, #00c6ff);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -1441,7 +1530,7 @@ onMounted(() => {
 }
 
 .pulling-item .item-icon {
-  color: #007DFF;
+  color: #007dff;
 }
 
 .pulling-item .item-icon svg {
@@ -1454,8 +1543,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 检测升级对话框样式 */
@@ -1491,7 +1584,7 @@ onMounted(() => {
 .progress-percent {
   font-size: 14px;
   font-weight: 600;
-  color: #007DFF;
+  color: #007dff;
 }
 
 .upgrade-steps {
@@ -1537,7 +1630,7 @@ onMounted(() => {
 }
 
 .upgrade-step.active .step-indicator {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
@@ -1577,7 +1670,7 @@ onMounted(() => {
 .step-percent {
   font-size: 12px;
   font-weight: 600;
-  color: #007DFF;
+  color: #007dff;
 }
 
 .step-time {
@@ -1627,7 +1720,7 @@ onMounted(() => {
 
 .version-upgrade-btn {
   padding: 6px 16px;
-  background: #007DFF;
+  background: #007dff;
   color: white;
   border: none;
   border-radius: 6px;

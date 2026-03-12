@@ -3,26 +3,33 @@
     <div class="header">
       <span class="header-title">{{ t('home.title') }}</span>
       <button class="header-action" @click="refresh">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 4 23 10 17 10"/>
-          <polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
       </button>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <template v-else>
       <div class="section-header">
         <div class="section-icon overview">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"/>
-            <rect x="14" y="3" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/>
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
           </svg>
         </div>
         <div class="section-info">
@@ -57,26 +64,34 @@
               <span class="usage-value">{{ totalCpuUsage.toFixed(1) }}%</span>
             </div>
             <div class="usage-bar">
-              <div class="usage-bar-fill" :style="{ width: Math.min(totalCpuUsage, 100) + '%' }"></div>
+              <div
+                class="usage-bar-fill"
+                :style="{ width: Math.min(totalCpuUsage, 100) + '%' }"
+              ></div>
             </div>
           </div>
           <div class="usage-item">
             <div class="usage-header">
               <span class="usage-label">{{ t('home.mem') }}</span>
-              <span class="usage-value">{{ formatBytes(totalMemoryBytes.used) }} / {{ formatBytes(totalMemoryBytes.limit) }}</span>
+              <span class="usage-value">
+                {{ formatBytes(totalMemoryBytes.used) }} / {{ formatBytes(totalMemoryBytes.limit) }}
+              </span>
             </div>
             <div class="usage-bar">
-              <div class="usage-bar-fill memory" :style="{ width: Math.min(totalMemoryUsage, 100) + '%' }"></div>
+              <div
+                class="usage-bar-fill memory"
+                :style="{ width: Math.min(totalMemoryUsage, 100) + '%' }"
+              ></div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div class="section-header">
         <div class="section-icon docker">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
           </svg>
         </div>
         <div class="section-info">
@@ -103,19 +118,19 @@
         <div class="empty-state" v-if="!dockerInfo">
           <div class="empty-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
           <div class="empty-text">{{ t('home.dockerNotRunning') }}</div>
         </div>
       </div>
-      
+
       <div class="section-header">
         <div class="section-icon running">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="5 3 19 12 5 21 5 3"/>
+            <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
         </div>
         <div class="section-info">
@@ -132,39 +147,50 @@
           >
             <div class="item-icon container-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
               </svg>
             </div>
             <div class="item-content">
-                <div class="item-title">{{ getContainerName(c) }}</div>
-                <div class="item-subtitle">{{ c.Image }}</div>
-                <div class="item-stats" v-if="containerStats[c.Id]">
-                  <span class="stat-tag cpu">{{ t('home.cpu') }}: {{ containerStats[c.Id].CPUPerc || '-' }}</span>
-                  <span class="stat-tag mem">{{ t('home.mem') }}: {{ formatMemory(containerStats[c.Id].MemUsage) }}</span>
-                  <span class="stat-tag net" v-if="containerStats[c.Id].NetIORate && containerStats[c.Id].NetIORate !== '-'">{{ containerStats[c.Id].NetIORate }}</span>
-                  <!-- 端口映射显示 -->
-                  <div class="item-ports" v-if="getUniquePorts(c).length > 0">
-                    <div class="port-item" v-for="port in getUniquePorts(c)" :key="port.PrivatePort">
-                      <span class="port-text" @click="openPortInNewTab(port.PublicPort)">{{ port.PublicPort }}:{{ port.PrivatePort }}</span>
-                    </div>
+              <div class="item-title">{{ getContainerName(c) }}</div>
+              <div class="item-subtitle">{{ c.Image }}</div>
+              <div class="item-stats" v-if="containerStats[c.Id]">
+                <span class="stat-tag cpu">
+                  {{ t('home.cpu') }}: {{ containerStats[c.Id].CPUPerc || '-' }}
+                </span>
+                <span class="stat-tag mem">
+                  {{ t('home.mem') }}: {{ formatMemory(containerStats[c.Id].MemUsage) }}
+                </span>
+                <span
+                  class="stat-tag net"
+                  v-if="containerStats[c.Id].NetIORate && containerStats[c.Id].NetIORate !== '-'"
+                >
+                  {{ containerStats[c.Id].NetIORate }}
+                </span>
+                <!-- 端口映射显示 -->
+                <div class="item-ports" v-if="getUniquePorts(c).length > 0">
+                  <div class="port-item" v-for="port in getUniquePorts(c)" :key="port.PrivatePort">
+                    <span class="port-text" @click="openPortInNewTab(port.PublicPort)">
+                      {{ port.PublicPort }}:{{ port.PrivatePort }}
+                    </span>
                   </div>
                 </div>
               </div>
+            </div>
             <span class="badge badge-success">{{ t('containers.state.running') }}</span>
           </div>
           <div class="more-link" @click="$router.push('/containers')">
             {{ t('common.viewAll') }} {{ runningContainers.length }}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
+              <polyline points="9 18 15 12 9 6" />
             </svg>
           </div>
         </div>
         <div v-else class="empty-state">
           <div class="empty-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
             </svg>
           </div>
           <div class="empty-text">{{ t('common.noData') }}</div>
@@ -299,7 +325,7 @@ function openPortInNewTab(port) {
 
 async function loadContainerStats() {
   // 并行加载所有运行中容器的统计信息（不限制数量）
-  const promises = runningContainers.value.map(async (c) => {
+  const promises = runningContainers.value.map(async c => {
     try {
       const data = await api.get(`/api/container/${c.Id}/stats`)
       if (data.stats) {
@@ -417,7 +443,7 @@ onUnmounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .stats-card {
+[data-theme='dark'] .stats-card {
   box-shadow: none;
 }
 
@@ -503,7 +529,7 @@ onUnmounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .info-card {
+[data-theme='dark'] .info-card {
   box-shadow: none;
 }
 
@@ -541,7 +567,7 @@ onUnmounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .list-card {
+[data-theme='dark'] .list-card {
   box-shadow: none;
 }
 
@@ -583,7 +609,7 @@ onUnmounted(() => {
 
 .item-icon.container-icon {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .item-content {
@@ -626,7 +652,7 @@ onUnmounted(() => {
 
 .stat-tag.cpu {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .stat-tag.mem {
@@ -675,7 +701,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 4px;
   padding: 14px;
-  color: #007DFF;
+  color: #007dff;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -718,7 +744,7 @@ onUnmounted(() => {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .stat-value {
     font-size: 24px;
   }

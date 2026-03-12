@@ -3,23 +3,24 @@
     <div class="header">
       <button class="header-back" @click="$router.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
-      <span class="header-title">{{ getContainerName(container) || t('containers.container') }}</span>
-
+      <span class="header-title">
+        {{ getContainerName(container) || t('containers.container') }}
+      </span>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <template v-else-if="container">
       <div class="section-header">
         <div class="section-icon status">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
           </svg>
         </div>
         <div class="section-info">
@@ -28,7 +29,9 @@
       </div>
       <div class="info-card">
         <div class="status-row">
-          <span class="badge" :class="getStatusClass(container.State)">{{ getStatusText(container.State) }}</span>
+          <span class="badge" :class="getStatusClass(container.State)">
+            {{ getStatusText(container.State) }}
+          </span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ t('containers.id') }}</span>
@@ -50,71 +53,104 @@
 
       <!-- 操作按钮 -->
       <div class="quick-actions">
-        <button v-if="container.State !== 'running'" class="quick-action-btn start" @click="startContainer">
+        <button
+          v-if="container.State !== 'running'"
+          class="quick-action-btn start"
+          @click="startContainer"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="5 3 19 12 5 21 5 3"/>
+            <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
           <span>{{ t('containers.actions.start') }}</span>
         </button>
-        <button v-if="container.State === 'running'" class="quick-action-btn stop" @click="stopContainer">
+        <button
+          v-if="container.State === 'running'"
+          class="quick-action-btn stop"
+          @click="stopContainer"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="6" y="4" width="4" height="16"/>
-            <rect x="14" y="4" width="4" height="16"/>
+            <rect x="6" y="4" width="4" height="16" />
+            <rect x="14" y="4" width="4" height="16" />
           </svg>
           <span>{{ t('containers.actions.stop') }}</span>
         </button>
-        <button v-if="container.State === 'running'" class="quick-action-btn restart" @click="restartContainer">
+        <button
+          v-if="container.State === 'running'"
+          class="quick-action-btn restart"
+          @click="restartContainer"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 4 23 10 17 10"/>
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
           </svg>
           <span>{{ t('containers.actions.restart') }}</span>
         </button>
-        <button v-if="container.State === 'running'" class="quick-action-btn pause" @click="pauseContainer">
+        <button
+          v-if="container.State === 'running'"
+          class="quick-action-btn pause"
+          @click="pauseContainer"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="6" y="4" width="4" height="16"/>
-            <rect x="14" y="4" width="4" height="16"/>
+            <rect x="6" y="4" width="4" height="16" />
+            <rect x="14" y="4" width="4" height="16" />
           </svg>
           <span>{{ t('containers.actions.pause') }}</span>
         </button>
-        <button v-if="container.State === 'paused'" class="quick-action-btn resume" @click="unpauseContainer">
+        <button
+          v-if="container.State === 'paused'"
+          class="quick-action-btn resume"
+          @click="unpauseContainer"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="5 3 19 12 5 21 5 3"/>
+            <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
           <span>{{ t('containers.actions.resume') }}</span>
         </button>
         <button class="quick-action-btn remove" @click="confirmRemove">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <polyline points="3 6 5 6 21 6" />
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+            />
           </svg>
           <span>{{ t('containers.actions.remove') }}</span>
         </button>
         <button class="quick-action-btn edit" @click="openEditModal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           <span>{{ t('containers.actions.edit') }}</span>
         </button>
         <button class="quick-action-btn more" @click="showMoreActions = true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="1"/>
-            <circle cx="19" cy="12" r="1"/>
-            <circle cx="5" cy="12" r="1"/>
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
           </svg>
           <span>{{ t('common.more') }}</span>
         </button>
       </div>
-      
+
       <div class="tabs-container">
         <div class="tabs">
-          <button class="tab" :class="{ active: tab === 'overview' }" @click="tab = 'overview'">{{ t('containers.overview') }}</button>
-          <button class="tab" :class="{ active: tab === 'logs' }" @click="tab = 'logs'">{{ t('containers.logs') }}</button>
-          <button class="tab" :class="{ active: tab === 'terminal' }" @click="tab = 'terminal'" v-if="container?.State === 'running'">{{ t('containers.terminal') }}</button>
+          <button class="tab" :class="{ active: tab === 'overview' }" @click="tab = 'overview'">
+            {{ t('containers.overview') }}
+          </button>
+          <button class="tab" :class="{ active: tab === 'logs' }" @click="tab = 'logs'">
+            {{ t('containers.logs') }}
+          </button>
+          <button
+            class="tab"
+            :class="{ active: tab === 'terminal' }"
+            @click="tab = 'terminal'"
+            v-if="container?.State === 'running'"
+          >
+            {{ t('containers.terminal') }}
+          </button>
         </div>
       </div>
-      
+
       <div class="tab-content">
         <!-- 概览标签 -->
         <div v-if="tab === 'overview'" class="info-section">
@@ -122,7 +158,11 @@
           <div v-if="hasPortBindings(containerInfo)" class="info-block">
             <div class="info-block-title">{{ t('containers.ports') }}</div>
             <div class="info-block-content">
-              <div v-for="item in getPortBindingsList(containerInfo)" :key="item.key" class="info-line">
+              <div
+                v-for="item in getPortBindingsList(containerInfo)"
+                :key="item.key"
+                class="info-line"
+              >
                 <span class="info-line-label">{{ item.container }}</span>
                 <span class="info-line-value">{{ item.host }}</span>
               </div>
@@ -130,7 +170,10 @@
           </div>
 
           <!-- 环境变量 -->
-          <div v-if="containerInfo?.Config?.Env && containerInfo.Config.Env.length > 0" class="info-block">
+          <div
+            v-if="containerInfo?.Config?.Env && containerInfo.Config.Env.length > 0"
+            class="info-block"
+          >
             <div class="info-block-title">{{ t('containers.env') }}</div>
             <div class="info-block-content">
               <div v-for="env in containerInfo.Config.Env" :key="env" class="info-line">
@@ -156,7 +199,11 @@
           <div v-if="containerInfo?.NetworkSettings?.Networks" class="info-block">
             <div class="info-block-title">{{ t('containers.networks') }}</div>
             <div class="info-block-content">
-              <div v-for="(config, name) in containerInfo.NetworkSettings.Networks" :key="name" class="info-line">
+              <div
+                v-for="(config, name) in containerInfo.NetworkSettings.Networks"
+                :key="name"
+                class="info-line"
+              >
                 <span class="info-line-label">{{ name }}</span>
                 <span class="info-line-value">{{ config.IPAddress || '-' }}</span>
               </div>
@@ -168,7 +215,9 @@
             <div class="info-block-title">{{ t('containers.restartPolicy') }}</div>
             <div class="info-block-content">
               <div class="info-line">
-                <span class="info-line-value">{{ containerInfo.HostConfig.RestartPolicy.Name }}</span>
+                <span class="info-line-value">
+                  {{ containerInfo.HostConfig.RestartPolicy.Name }}
+                </span>
               </div>
             </div>
           </div>
@@ -194,8 +243,8 @@
           <div class="section-toolbar">
             <button class="toolbar-btn" @click="loadLogs">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 4 23 10 17 10"/>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
               </svg>
               {{ t('containers.refresh') }}
             </button>
@@ -205,7 +254,7 @@
         </div>
 
         <div v-else-if="tab === 'terminal'" class="terminal-tab">
-          <Terminal 
+          <Terminal
             ref="terminalRef"
             :container-id="containerId"
             :connect-text="t('containers.newTerminal')"
@@ -216,18 +265,18 @@
         </div>
       </div>
     </template>
-    
+
     <div v-else class="empty-state">
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="15" y1="9" x2="9" y2="15" />
+          <line x1="9" y1="9" x2="15" y2="15" />
         </svg>
       </div>
       <div class="empty-text">{{ t('containers.notFound') }}</div>
     </div>
-    
+
     <!-- 更多操作菜单 -->
     <div v-if="showMoreActions" class="action-sheet-overlay" @click.self="showMoreActions = false">
       <div class="action-sheet">
@@ -235,18 +284,18 @@
         <div class="action-sheet-content">
           <button class="sheet-btn" @click="generateDockerRun">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="4 17 10 11 4 5"/>
-              <line x1="12" y1="19" x2="20" y2="19"/>
+              <polyline points="4 17 10 11 4 5" />
+              <line x1="12" y1="19" x2="20" y2="19" />
             </svg>
             {{ t('containers.generateDockerRun') }}
           </button>
           <button class="sheet-btn" @click="generateCompose">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
             </svg>
             {{ t('containers.generateCompose') }}
           </button>
@@ -261,8 +310,8 @@
           <h3 class="modal-title">{{ t('containers.edit') }}</h3>
           <button class="modal-close" @click="showEditModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -272,11 +321,21 @@
             <div class="section-title">{{ t('containers.basicInfo') }}</div>
             <div class="form-field">
               <label class="form-label">{{ t('containers.name') }}</label>
-              <input type="text" class="form-input" v-model="editForm.name" :placeholder="t('containers.namePlaceholder')" />
+              <input
+                type="text"
+                class="form-input"
+                v-model="editForm.name"
+                :placeholder="t('containers.namePlaceholder')"
+              />
             </div>
             <div class="form-field">
               <label class="form-label">{{ t('containers.hostname') }}</label>
-              <input type="text" class="form-input" v-model="editForm.hostname" placeholder="my-container" />
+              <input
+                type="text"
+                class="form-input"
+                v-model="editForm.hostname"
+                placeholder="my-container"
+              />
             </div>
           </div>
 
@@ -286,23 +345,32 @@
               <div class="section-title">{{ t('containers.ports') }}</div>
               <button class="add-btn" @click="addEditPort">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
               </button>
             </div>
             <div class="dynamic-list">
-              <div v-for="(port, index) in editForm.ports" :key="'port-' + index" class="dynamic-item triple-item">
+              <div
+                v-for="(port, index) in editForm.ports"
+                :key="'port-' + index"
+                class="dynamic-item triple-item"
+              >
                 <input type="text" class="form-input" v-model="port.host" placeholder="主机端口" />
-                <input type="text" class="form-input" v-model="port.container" placeholder="容器端口" />
+                <input
+                  type="text"
+                  class="form-input"
+                  v-model="port.container"
+                  placeholder="容器端口"
+                />
                 <select class="form-input" v-model="port.protocol">
                   <option value="tcp">TCP</option>
                   <option value="udp">UDP</option>
                 </select>
                 <button class="remove-btn" @click="removeEditPort(index)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
               </div>
@@ -315,23 +383,37 @@
               <div class="section-title">{{ t('containers.volumes') }}</div>
               <button class="add-btn" @click="addEditVolume">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
               </button>
             </div>
             <div class="dynamic-list">
-              <div v-for="(volume, index) in editForm.volumes" :key="'volume-' + index" class="dynamic-item triple-item">
-                <input type="text" class="form-input" v-model="volume.host" placeholder="主机路径" />
-                <input type="text" class="form-input" v-model="volume.container" placeholder="容器路径" />
+              <div
+                v-for="(volume, index) in editForm.volumes"
+                :key="'volume-' + index"
+                class="dynamic-item triple-item"
+              >
+                <input
+                  type="text"
+                  class="form-input"
+                  v-model="volume.host"
+                  placeholder="主机路径"
+                />
+                <input
+                  type="text"
+                  class="form-input"
+                  v-model="volume.container"
+                  placeholder="容器路径"
+                />
                 <select class="form-input" v-model="volume.mode">
                   <option value="rw">读写</option>
                   <option value="ro">只读</option>
                 </select>
                 <button class="remove-btn" @click="removeEditVolume(index)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
               </div>
@@ -344,20 +426,29 @@
               <div class="section-title">{{ t('containers.env') }}</div>
               <button class="add-btn" @click="addEditEnv">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
               </button>
             </div>
             <div class="dynamic-list">
-              <div v-for="(env, index) in editForm.envs" :key="'env-' + index" class="dynamic-item env-item">
+              <div
+                v-for="(env, index) in editForm.envs"
+                :key="'env-' + index"
+                class="dynamic-item env-item"
+              >
                 <input type="text" class="form-input env-key" v-model="env.key" placeholder="KEY" />
                 <span class="env-equal">=</span>
-                <input type="text" class="form-input env-value" v-model="env.value" placeholder="value" />
+                <input
+                  type="text"
+                  class="form-input env-value"
+                  v-model="env.value"
+                  placeholder="value"
+                />
                 <button class="remove-btn" @click="removeEditEnv(index)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
               </div>
@@ -368,8 +459,14 @@
           <div class="form-section collapsible" :class="{ expanded: editShowAdvanced }">
             <div class="section-header clickable" @click="editShowAdvanced = !editShowAdvanced">
               <div class="section-title">{{ t('containers.advancedOptions') }}</div>
-              <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"/>
+              <svg
+                class="expand-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9" />
               </svg>
             </div>
             <div class="advanced-content" v-if="editShowAdvanced">
@@ -385,18 +482,36 @@
               <div class="form-row">
                 <div class="form-field half">
                   <label class="form-label">{{ t('containers.memoryLimit') }} (MB)</label>
-                  <input type="number" class="form-input" v-model.number="editForm.memory" placeholder="0" min="0" />
+                  <input
+                    type="number"
+                    class="form-input"
+                    v-model.number="editForm.memory"
+                    placeholder="0"
+                    min="0"
+                  />
                 </div>
                 <div class="form-field half">
                   <label class="form-label">{{ t('containers.cpuLimit') }}</label>
-                  <input type="number" class="form-input" v-model.number="editForm.cpuShares" placeholder="1024" min="0" />
+                  <input
+                    type="number"
+                    class="form-input"
+                    v-model.number="editForm.cpuShares"
+                    placeholder="1024"
+                    min="0"
+                  />
                 </div>
               </div>
               <div class="form-field checkbox-field">
                 <label class="checkbox-item" @click="editForm.privileged = !editForm.privileged">
                   <div class="checkbox" :class="{ checked: editForm.privileged }">
-                    <svg v-if="editForm.privileged" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                      <polyline points="20 6 9 17 4 12"/>
+                    <svg
+                      v-if="editForm.privileged"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </div>
                   <span class="checkbox-label">{{ t('containers.privileged') }}</span>
@@ -406,14 +521,16 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showEditModal = false">{{ t('common.cancel') }}</button>
+          <button class="btn btn-secondary" @click="showEditModal = false">
+            {{ t('common.cancel') }}
+          </button>
           <button class="btn btn-primary" @click="saveEdit" :disabled="editLoading">
             {{ editLoading ? t('common.saving') : t('common.confirm') }}
           </button>
         </div>
       </div>
     </div>
-    
+
     <!-- 生成 Docker Run 命令模态框 -->
     <div v-if="showDockerRunModal" class="modal-overlay" @click.self="showDockerRunModal = false">
       <div class="modal-container modal-large">
@@ -421,8 +538,8 @@
           <h3 class="modal-title">{{ t('containers.dockerRunCommand') }}</h3>
           <button class="modal-close" @click="showDockerRunModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -430,7 +547,9 @@
           <pre class="compose-viewer">{{ dockerRunCommand }}</pre>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showDockerRunModal = false">{{ t('common.close') }}</button>
+          <button class="btn btn-secondary" @click="showDockerRunModal = false">
+            {{ t('common.close') }}
+          </button>
           <button class="btn btn-primary" @click="copyDockerRun">
             {{ dockerRunCopied ? t('common.copied') : t('common.copy') }}
           </button>
@@ -446,8 +565,8 @@
           <h3 class="modal-title">{{ t('containers.dockerRunCommand') }}</h3>
           <button class="modal-close" @click="showDockerRunModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -455,7 +574,9 @@
           <pre class="compose-viewer">{{ dockerRunCommand }}</pre>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showDockerRunModal = false">{{ t('common.close') }}</button>
+          <button class="btn btn-secondary" @click="showDockerRunModal = false">
+            {{ t('common.close') }}
+          </button>
           <button class="btn btn-primary" @click="copyDockerRun">
             {{ dockerRunCopied ? t('common.copied') : t('common.copy') }}
           </button>
@@ -470,8 +591,8 @@
           <h3 class="modal-title">{{ t('containers.composeFile') }}</h3>
           <button class="modal-close" @click="showComposeModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -479,7 +600,9 @@
           <pre class="compose-viewer">{{ composeContent }}</pre>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showComposeModal = false">{{ t('common.close') }}</button>
+          <button class="btn btn-secondary" @click="showComposeModal = false">
+            {{ t('common.close') }}
+          </button>
           <button class="btn btn-primary" @click="copyCompose">
             {{ copied ? t('common.copied') : t('common.copy') }}
           </button>
@@ -487,7 +610,7 @@
       </div>
     </div>
 
-    <ConfirmModal 
+    <ConfirmModal
       v-if="showConfirm"
       :title="t('containers.deleteContainer')"
       :message="t('containers.confirmDelete') + ' ' + getContainerName(container) + '?'"
@@ -544,9 +667,9 @@ const copied = ref(false)
 const showDockerRunModal = ref(false)
 const dockerRunCommand = ref('')
 const dockerRunCopied = ref(false)
-let prevNetworkRx = ref(0)
-let prevNetworkTx = ref(0)
-let prevNetworkTime = ref(0)
+let _prevNetworkRx = ref(0)
+let _prevNetworkTx = ref(0)
+let _prevNetworkTime = ref(0)
 let logsInterval = null
 
 const containerId = route.params.id
@@ -564,21 +687,23 @@ function cleanLogOutput(logText) {
   if (!logText) return ''
 
   // 移除或替换常见的控制字符
-  return logText
-    // 移除SOH (Start of Heading) \u0001
-    .replace(/\x01/g, '')
-    // 移除STX (Start of Text) \u0002
-    .replace(/\x02/g, '')
-    // 移除其他常见的控制字符（保留换行\x0A、回车\x0D、制表符\x09等）
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-    // 修复缺少ESC字符的ANSI颜色代码
-    // 将 [数字m 格式转换为标准的 \x1B[数字m 格式
-    .replace(/\[(\d+(?:;\d+)*)m/g, '\x1B[$1m')
-    // 移除ANSI光标控制序列(保留颜色代码)
-    .replace(/\x1B\[[0-9;]*[A-HJKSTfmin]/g, '')
-    // 移除其他ANSI转义序列
-    .replace(/\x1B\][^\x07]*\x07/g, '')
-    .replace(/\x1B[PX^_].*?\x1B\\/g, '')
+  return (
+    logText
+      // 移除SOH (Start of Heading) \u0001
+      .replace(/\x01/g, '')
+      // 移除STX (Start of Text) \u0002
+      .replace(/\x02/g, '')
+      // 移除其他常见的控制字符（保留换行\x0A、回车\x0D、制表符\x09等）
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+      // 修复缺少ESC字符的ANSI颜色代码
+      // 将 [数字m 格式转换为标准的 \x1B[数字m 格式
+      .replace(/\[(\d+(?:;\d+)*)m/g, '\x1B[$1m')
+      // 移除ANSI光标控制序列(保留颜色代码)
+      .replace(/\x1B\[[0-9;]*[A-HJKSTfmin]/g, '')
+      // 移除其他ANSI转义序列
+      .replace(/\x1B\][^\x07]*\x07/g, '')
+      .replace(/\x1B[PX^_].*?\x1B\\/g, '')
+  )
 }
 
 const formattedLogs = computed(() => {
@@ -616,19 +741,27 @@ function formatTime(timestamp) {
 
 function getStatusClass(state) {
   switch (state) {
-    case 'running': return 'badge-success'
-    case 'paused': return 'badge-warning'
-    case 'exited': return 'badge-danger'
-    default: return 'badge-info'
+    case 'running':
+      return 'badge-success'
+    case 'paused':
+      return 'badge-warning'
+    case 'exited':
+      return 'badge-danger'
+    default:
+      return 'badge-info'
   }
 }
 
 function getStatusText(state) {
   switch (state) {
-    case 'running': return t('containers.state.running')
-    case 'paused': return t('containers.state.paused')
-    case 'exited': return t('containers.state.exited')
-    default: return state
+    case 'running':
+      return t('containers.state.running')
+    case 'paused':
+      return t('containers.state.paused')
+    case 'exited':
+      return t('containers.state.exited')
+    default:
+      return state
   }
 }
 
@@ -662,7 +795,8 @@ function getPortBindingsList(info) {
         if (seenPorts.has(uniqueKey)) continue
         seenPorts.add(uniqueKey)
 
-        const hostValue = (hostIp && hostIp !== '0.0.0.0' && hostIp !== '::') ? `${hostIp}:${hostPort}` : hostPort
+        const hostValue =
+          hostIp && hostIp !== '0.0.0.0' && hostIp !== '::' ? `${hostIp}:${hostPort}` : hostPort
         result.push({
           key: uniqueKey,
           container: `${portNum}/${protocol || 'tcp'}`,
@@ -681,10 +815,11 @@ async function loadContainer() {
       api.get('/api/containers'),
       api.get(`/api/container/${containerId}`).catch(() => null)
     ])
-    const c = (containersRes.containers || []).find(c => c.Id === containerId || c.Id?.startsWith(containerId))
+    const c = (containersRes.containers || []).find(
+      c => c.Id === containerId || c.Id?.startsWith(containerId)
+    )
     container.value = c
     containerInfo.value = infoRes?.info || null
-    
   } catch (e) {
     console.error('Failed to load container:', e)
   } finally {
@@ -773,15 +908,15 @@ async function removeContainer() {
   }
 }
 
-function renameContainer() {
-  showMoreActions.value = false
-  const newName = prompt(t('containers.actions.rename') + ':', getContainerName(container.value))
-  if (newName && newName !== getContainerName(container.value)) {
-    api.post(`/api/container/${containerId}/rename`, { name: newName })
-      .then(() => { showToast(t('containers.renamed')); loadContainer() })
-      .catch(e => showToast(t('containers.renameFailed') + ': ' + e.message))
-  }
-}
+// // function renameContainer() {
+//   showMoreActions.value = false
+//   const newName = prompt(t('containers.actions.rename') + ':', getContainerName(container.value))
+//   if (newName && newName !== getContainerName(container.value)) {
+//     api.post(`/api/container/${containerId}/rename`, { name: newName })
+//       .then(() => { showToast(t('containers.renamed')); loadContainer() })
+//       .catch(e => showToast(t('containers.renameFailed') + ': ' + e.message))
+//   }
+// }
 
 // 生成 Docker Run 命令
 function generateDockerRun() {
@@ -990,13 +1125,32 @@ function escapeShellArg(arg) {
 // 复制 Docker Run 命令到剪贴板
 async function copyDockerRun() {
   try {
-    await navigator.clipboard.writeText(dockerRunCommand.value)
+    // 优先使用现代 Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(dockerRunCommand.value)
+    } else {
+      // Fallback: 使用传统方法
+      const textarea = document.createElement('textarea')
+      textarea.value = dockerRunCommand.value
+      textarea.style.position = 'fixed'
+      textarea.style.left = '-9999px'
+      textarea.style.top = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.focus()
+      textarea.select()
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textarea)
+      if (!successful) {
+        throw new Error('execCommand copy failed')
+      }
+    }
     dockerRunCopied.value = true
     showToast(t('common.copied'))
     setTimeout(() => {
       dockerRunCopied.value = false
     }, 2000)
   } catch (e) {
+    console.error('Copy failed:', e)
     showToast(t('common.copyFailed'))
   }
 }
@@ -1239,10 +1393,16 @@ function generateCompose() {
   if (config.Healthcheck) {
     service.healthcheck = {
       test: config.Healthcheck.Test,
-      interval: config.Healthcheck.Interval ? `${Math.round(config.Healthcheck.Interval / 1000000000)}s` : undefined,
-      timeout: config.Healthcheck.Timeout ? `${Math.round(config.Healthcheck.Timeout / 1000000000)}s` : undefined,
+      interval: config.Healthcheck.Interval
+        ? `${Math.round(config.Healthcheck.Interval / 1000000000)}s`
+        : undefined,
+      timeout: config.Healthcheck.Timeout
+        ? `${Math.round(config.Healthcheck.Timeout / 1000000000)}s`
+        : undefined,
       retries: config.Healthcheck.Retries,
-      start_period: config.Healthcheck.StartPeriod ? `${Math.round(config.Healthcheck.StartPeriod / 1000000000)}s` : undefined
+      start_period: config.Healthcheck.StartPeriod
+        ? `${Math.round(config.Healthcheck.StartPeriod / 1000000000)}s`
+        : undefined
     }
     // 移除 undefined 值
     for (const key of Object.keys(service.healthcheck)) {
@@ -1265,8 +1425,9 @@ function generateCompose() {
 
   // 如果有自定义网络，添加网络配置
   if (info.NetworkSettings?.Networks) {
-    const customNetworks = Object.entries(info.NetworkSettings.Networks)
-      .filter(([name]) => name !== 'bridge' && name !== 'host' && name !== 'none')
+    const customNetworks = Object.entries(info.NetworkSettings.Networks).filter(
+      ([name]) => name !== 'bridge' && name !== 'host' && name !== 'none'
+    )
     if (customNetworks.length > 0) {
       compose.networks = {}
       customNetworks.forEach(([name]) => {
@@ -1306,7 +1467,12 @@ function yamlStringify(obj, indent = 0) {
     } else {
       // 处理包含特殊字符的字符串
       const strValue = String(value)
-      if (strValue.includes(':') || strValue.includes('#') || strValue.includes('{') || strValue.includes('"')) {
+      if (
+        strValue.includes(':') ||
+        strValue.includes('#') ||
+        strValue.includes('{') ||
+        strValue.includes('"')
+      ) {
         result += `${spaces}${key}: "${strValue.replace(/"/g, '\\"')}"\n`
       } else {
         result += `${spaces}${key}: ${strValue}\n`
@@ -1320,18 +1486,37 @@ function yamlStringify(obj, indent = 0) {
 // 复制 Compose 内容到剪贴板
 async function copyCompose() {
   try {
-    await navigator.clipboard.writeText(composeContent.value)
+    // 优先使用现代 Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(composeContent.value)
+    } else {
+      // Fallback: 使用传统方法
+      const textarea = document.createElement('textarea')
+      textarea.value = composeContent.value
+      textarea.style.position = 'fixed'
+      textarea.style.left = '-9999px'
+      textarea.style.top = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.focus()
+      textarea.select()
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textarea)
+      if (!successful) {
+        throw new Error('execCommand copy failed')
+      }
+    }
     copied.value = true
     showToast(t('common.copied'))
     setTimeout(() => {
       copied.value = false
     }, 2000)
   } catch (e) {
+    console.error('Copy failed:', e)
     showToast(t('common.copyFailed'))
   }
 }
 
-watch(tab, (newTab, oldTab) => {
+watch(tab, (newTab, _oldTab) => {
   if (newTab === 'logs') {
     loadLogs(true) // 切换标签时显示 loading
     startLogsAutoRefresh()
@@ -1395,13 +1580,14 @@ function openEditModal() {
           const hostPort = validBinding.HostPort
           const hostIp = validBinding.HostIp
           const [portNum, protocol] = containerPort.split('/')
-          
+
           // 去重键：主机端口 + 容器端口 + 协议
           const uniqueKey = `${hostPort}:${portNum}:${protocol || 'tcp'}`
           if (seenPorts.has(uniqueKey)) continue
           seenPorts.add(uniqueKey)
-          
-          const hostValue = (hostIp && hostIp !== '0.0.0.0' && hostIp !== '::') ? `${hostIp}:${hostPort}` : hostPort
+
+          const hostValue =
+            hostIp && hostIp !== '0.0.0.0' && hostIp !== '::' ? `${hostIp}:${hostPort}` : hostPort
           editForm.value.ports.push({
             host: hostValue,
             container: portNum,
@@ -1520,9 +1706,7 @@ async function saveEdit() {
     }
 
     // 处理环境变量
-    const envs = editForm.value.envs
-      .filter(e => e.key.trim())
-      .map(e => `${e.key}=${e.value}`)
+    const envs = editForm.value.envs.filter(e => e.key.trim()).map(e => `${e.key}=${e.value}`)
 
     if (envs.length > 0) {
       updateData.env = envs
@@ -1600,7 +1784,7 @@ async function saveEdit() {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .info-card {
+[data-theme='dark'] .info-card {
   box-shadow: none;
 }
 
@@ -1677,38 +1861,38 @@ async function saveEdit() {
 }
 
 .quick-action-btn.start {
-  background: linear-gradient(135deg, #00C853 0%, #00E676 100%);
+  background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
   color: white;
 }
 
 .quick-action-btn.stop {
-  background: linear-gradient(135deg, #FF5252 0%, #FF1744 100%);
+  background: linear-gradient(135deg, #ff5252 0%, #ff1744 100%);
   color: white;
 }
 
 .quick-action-btn.restart {
-  background: linear-gradient(135deg, #448AFF 0%, #2979FF 100%);
+  background: linear-gradient(135deg, #448aff 0%, #2979ff 100%);
   color: white;
 }
 
 .quick-action-btn.pause,
 .quick-action-btn.resume {
-  background: linear-gradient(135deg, #FFB300 0%, #FFA000 100%);
+  background: linear-gradient(135deg, #ffb300 0%, #ffa000 100%);
   color: white;
 }
 
 .quick-action-btn.edit {
-  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
   color: white;
 }
 
 .quick-action-btn.remove {
-  background: linear-gradient(135deg, #FF5252 0%, #FF1744 100%);
+  background: linear-gradient(135deg, #ff5252 0%, #ff1744 100%);
   color: white;
 }
 
 .quick-action-btn.more {
-  background: linear-gradient(135deg, #607D8B 0%, #455A64 100%);
+  background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);
   color: white;
 }
 
@@ -1724,7 +1908,7 @@ async function saveEdit() {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .overview-card {
+[data-theme='dark'] .overview-card {
   box-shadow: none;
 }
 
@@ -1770,7 +1954,7 @@ async function saveEdit() {
 
 .overview-tag.env-tag {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .overview-tag.volume-tag {
@@ -1802,7 +1986,7 @@ async function saveEdit() {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .tabs {
+[data-theme='dark'] .tabs {
   box-shadow: none;
 }
 
@@ -1821,7 +2005,7 @@ async function saveEdit() {
 }
 
 .tab.active {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
@@ -1829,17 +2013,20 @@ async function saveEdit() {
   padding: 0 12px 12px;
 }
 
-.logs-section, .stats-section, .info-section, .terminal-section {
+.logs-section,
+.stats-section,
+.info-section,
+.terminal-section {
   background: var(--card-bg);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .logs-section,
-[data-theme="dark"] .stats-section,
-[data-theme="dark"] .info-section,
-[data-theme="dark"] .terminal-section {
+[data-theme='dark'] .logs-section,
+[data-theme='dark'] .stats-section,
+[data-theme='dark'] .info-section,
+[data-theme='dark'] .terminal-section {
   box-shadow: none;
 }
 
@@ -1885,7 +2072,7 @@ async function saveEdit() {
 
 .log-viewer :deep(br) {
   display: block;
-  content: "";
+  content: '';
   margin-bottom: 0.2em;
 }
 
@@ -1949,7 +2136,7 @@ async function saveEdit() {
 .mount-type {
   display: inline-block;
   padding: 2px 6px;
-  background: #007DFF;
+  background: #007dff;
   color: white;
   font-size: 11px;
   border-radius: 4px;
@@ -2069,17 +2256,25 @@ async function saveEdit() {
 }
 
 .sheet-btn.danger {
-  color: #FA2A2D;
+  color: #fa2a2d;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* Compose 文件查看器 */
@@ -2214,12 +2409,12 @@ async function saveEdit() {
 }
 
 .btn-primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #0056CC;
+  background: #0056cc;
 }
 
 .btn-primary:disabled {
@@ -2295,7 +2490,7 @@ async function saveEdit() {
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
 }
 
 .form-row {
@@ -2324,7 +2519,7 @@ async function saveEdit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #007DFF;
+  background: #007dff;
   border: none;
   border-radius: 6px;
   color: white;
@@ -2435,8 +2630,8 @@ async function saveEdit() {
 }
 
 .checkbox.checked {
-  background: #007DFF;
-  border-color: #007DFF;
+  background: #007dff;
+  border-color: #007dff;
 }
 
 .checkbox svg {

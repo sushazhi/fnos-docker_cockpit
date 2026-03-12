@@ -3,8 +3,10 @@ package docker
 import (
 	"context"
 	"dockpit/internal/config"
+	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"strings"
 	"time"
 
@@ -18,6 +20,9 @@ import (
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/remote"
 )
 
 var cli *client.Client
@@ -162,11 +167,11 @@ func (s *ContainerService) Commit(ctx context.Context, id string, options contai
 	return cli.ContainerCommit(ctx, id, options)
 }
 
-func (s *ContainerService) ExecCreate(ctx context.Context, id string, opts types.ExecConfig) (types.IDResponse, error) {
+func (s *ContainerService) ExecCreate(ctx context.Context, id string, opts container.ExecOptions) (types.IDResponse, error) {
 	return cli.ContainerExecCreate(ctx, id, opts)
 }
 
-func (s *ContainerService) ExecAttach(ctx context.Context, execID string, opts types.ExecStartCheck) (types.HijackedResponse, error) {
+func (s *ContainerService) ExecAttach(ctx context.Context, execID string, opts container.ExecAttachOptions) (types.HijackedResponse, error) {
 	return cli.ContainerExecAttach(ctx, execID, opts)
 }
 
@@ -240,11 +245,11 @@ func (s *ImageService) RemoveTag(ctx context.Context, tag string) error {
 	return err
 }
 
-func (s *ImageService) Search(ctx context.Context, term string, opts types.ImageSearchOptions) ([]registry.SearchResult, error) {
+func (s *ImageService) Search(ctx context.Context, term string, opts registry.SearchOptions) ([]registry.SearchResult, error) {
 	return cli.ImageSearch(ctx, term, opts)
 }
 
-func (s *ImageService) Prune(ctx context.Context) (types.ImagesPruneReport, error) {
+func (s *ImageService) Prune(ctx context.Context) (image.PruneReport, error) {
 	return cli.ImagesPrune(ctx, filters.NewArgs())
 }
 
@@ -252,57 +257,197 @@ func (s *ImageService) History(ctx context.Context, id string) ([]image.HistoryR
 	return cli.ImageHistory(ctx, id)
 }
 
-func (s *ImageService) CheckUpdate(ctx context.Context, localImage, remoteImage string) (bool, string, error) {
-	inspect, _, err := cli.ImageInspectWithRaw(ctx, localImage)
-	if err != nil {
-		return false, "", err
+func (s *ImageService) CheckUpdate(ctx context.Context, localImage, remoteImage string, localDigests []string) (bool, string, string, error) {
+	
+	// 直接使用传入的 RepoDigests，而不是重新 inspect
+	if len(localDigests) == 0 {
+		return false, "", "本地镜像没有RepoDigests信息，无法检查更新（可能是本地构建或特殊导入的镜像）", nil
 	}
 
-	if len(inspect.RepoDigests) == 0 {
-		return false, "", nil
-	}
-
-	localDigest := inspect.RepoDigests[0]
+	localDigest := localDigests[0]
 	parts := strings.SplitN(localDigest, "@", 2)
 	if len(parts) != 2 {
-		return false, "", nil
+		return false, "", "无法解析本地镜像的digest信息", nil
 	}
-	repo := parts[0]
 	localDigestHash := parts[1]
 
-	pullReader, err := cli.ImagePull(ctx, remoteImage, image.PullOptions{})
-	if err != nil {
-		return false, "", err
-	}
-	defer pullReader.Close()
+	// 使用 go-containerregistry 库查询远程镜像的 digest
 
-	io.ReadAll(pullReader)
-
-	updatedInspect, _, err := cli.ImageInspectWithRaw(ctx, localImage)
-	if err != nil {
-		return false, "", err
+	// 解析镜像名称和标签
+	imageName := remoteImage
+	tag := "latest"
+	if strings.Contains(remoteImage, ":") {
+		parts := strings.SplitN(remoteImage, ":", 2)
+		imageName = parts[0]
+		tag = parts[1]
 	}
 
-	if len(updatedInspect.RepoDigests) == 0 {
-		return false, "", nil
-	}
-
-	updatedDigest := ""
-	for _, d := range updatedInspect.RepoDigests {
-		if strings.HasPrefix(d, repo+"@") {
-			updatedDigest = d
-			break
+	// 对于镜像加速源，必须去掉加速源前缀，查询Docker Hub（原始源）
+	// 因为：
+	// 1. 加速源通常不支持Registry API，只是pull代理
+	// 2. 本地镜像的RepoDigests记录的是Docker Hub的digest
+	// 3. 必须查询原始源才能准确比较
+	if strings.Contains(imageName, "/") {
+		parts := strings.Split(imageName, "/")
+		// 如果第一部分看起来像域名（包含 . 或 :），说明是加速源
+		if strings.Contains(parts[0], ".") || strings.Contains(parts[0], ":") {
+			// 去掉加速源前缀，使用原始镜像名称查询Docker Hub
+			if len(parts) > 1 {
+				imageName = strings.Join(parts[1:], "/")
+			}
 		}
 	}
 
-	if updatedDigest == "" {
-		return false, "", nil
+	// 智能选择查询策略：
+	// 1. 如果配置了镜像加速源，直接查询加速源（因为Docker Hub在中国可能无法访问）
+	// 2. 如果未配置加速源，查询Docker Hub
+	var remoteDigestHash string
+	var err error
+
+	// 检查是否配置了镜像加速源
+	if strings.Contains(remoteImage, "/") {
+		parts := strings.Split(remoteImage, "/")
+		if strings.Contains(parts[0], ".") || strings.Contains(parts[0], ":") {
+			// 配置了镜像加速源，直接查询加速源
+			registryHost := parts[0]
+			// 去掉可能存在的tag
+			imagePathWithPossibleTag := strings.Join(parts[1:], "/")
+			imagePath := imagePathWithPossibleTag
+			if strings.Contains(imagePathWithPossibleTag, ":") {
+				imagePathParts := strings.SplitN(imagePathWithPossibleTag, ":", 2)
+				imagePath = imagePathParts[0]
+			}
+
+			remoteDigestHash, err = s.queryWithGoContainerRegistry(fmt.Sprintf("%s/%s", registryHost, imagePath), tag)
+			if err != nil {
+				return false, "", "无法检查更新（网络限制），建议手动更新镜像", nil
+			}
+		} else {
+			// 未配置加速源，查询Docker Hub
+			remoteDigestHash, err = s.queryWithGoContainerRegistry(imageName, tag)
+			if err != nil {
+				return false, "", "无法检查更新（网络限制），建议手动更新镜像", nil
+			}
+		}
+	} else {
+		// 未配置加速源，查询Docker Hub
+		remoteDigestHash, err = s.queryWithGoContainerRegistry(imageName, tag)
+		if err != nil {
+			return false, "", "无法检查更新（网络限制），建议手动更新镜像", nil
+		}
 	}
 
-	updatedDigestHash := strings.SplitN(updatedDigest, "@", 2)[1]
-	hasUpdate := localDigestHash != updatedDigestHash
 
-	return hasUpdate, updatedDigestHash, nil
+	// 比较本地和远程的 digest
+	hasUpdate := localDigestHash != remoteDigestHash
+
+
+	var reason string
+	if hasUpdate {
+		reason = "发现新版本可用"
+	} else {
+		reason = "当前已是最新版本"
+	}
+
+	return hasUpdate, remoteDigestHash, reason, nil
+}
+
+// queryWithGoContainerRegistry 使用 go-containerregistry 库查询镜像 digest
+func (s *ImageService) queryWithGoContainerRegistry(imageName, tag string) (string, error) {
+	// 构建镜像引用
+	ref, err := name.ParseReference(fmt.Sprintf("%s:%s", imageName, tag))
+	if err != nil {
+		return "", fmt.Errorf("解析镜像名称失败: %v", err)
+	}
+	
+	
+	// 获取远程镜像的描述信息
+	desc, err := remote.Get(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
+	if err != nil {
+		return "", fmt.Errorf("获取远程镜像失败: %v", err)
+	}
+	
+	// 获取 digest
+	digest := desc.Digest.String()
+	if digest == "" {
+		return "", fmt.Errorf("未获取到 digest")
+	}
+	
+	// 提取 digest hash
+	if strings.Contains(digest, ":") {
+		return strings.SplitN(digest, ":", 2)[1], nil
+	}
+	return digest, nil
+}
+
+// queryRegistryWithAuth 查询需要认证的 Registry API
+func (s *ImageService) queryRegistryWithAuth(registryHost, imagePath, tag string) (string, error) {
+	// 步骤1: 获取认证token
+	// 从 Www-Authenticate 头解析认证URL
+	authURL := fmt.Sprintf("https://%s/openapi/v1/auth/token/%s/repository:%s:pull", registryHost, registryHost, imagePath)
+	
+	
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(authURL)
+	if err != nil {
+		return "", fmt.Errorf("获取认证token失败: %v", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("认证失败: HTTP %d", resp.StatusCode)
+	}
+	
+	// 解析token
+	var tokenResp struct {
+		Token string `json:"token"`
+	}
+	
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("读取token响应失败: %v", err)
+	}
+	
+	if err := json.Unmarshal(body, &tokenResp); err != nil {
+		return "", fmt.Errorf("解析token失败: %v", err)
+	}
+	
+	if tokenResp.Token == "" {
+		return "", fmt.Errorf("未获取到token")
+	}
+	
+	// 步骤2: 使用token查询manifest
+	manifestURL := fmt.Sprintf("https://%s/v2/%s/manifests/%s", registryHost, imagePath, tag)
+	
+	req, err := http.NewRequest("HEAD", manifestURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("创建请求失败: %v", err)
+	}
+	
+	req.Header.Set("Authorization", "Bearer "+tokenResp.Token)
+	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.v2+json")
+	
+	resp, err = client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("查询manifest失败: %v", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("manifest查询失败: HTTP %d", resp.StatusCode)
+	}
+	
+	// 获取 digest
+	digest := resp.Header.Get("Docker-Content-Digest")
+	if digest == "" {
+		return "", fmt.Errorf("未获取到digest")
+	}
+	
+	// 提取 digest hash
+	if strings.Contains(digest, ":") {
+		return strings.SplitN(digest, ":", 2)[1], nil
+	}
+	return digest, nil
 }
 
 type NetworkService struct{}
@@ -311,15 +456,15 @@ func NewNetworkService() *NetworkService {
 	return &NetworkService{}
 }
 
-func (s *NetworkService) List(ctx context.Context) ([]types.NetworkResource, error) {
+func (s *NetworkService) List(ctx context.Context) ([]network.Inspect, error) {
 	return cli.NetworkList(ctx, network.ListOptions{})
 }
 
-func (s *NetworkService) Inspect(ctx context.Context, id string) (types.NetworkResource, error) {
+func (s *NetworkService) Inspect(ctx context.Context, id string) (network.Inspect, error) {
 	return cli.NetworkInspect(ctx, id, network.InspectOptions{})
 }
 
-func (s *NetworkService) Create(ctx context.Context, name string, opts types.NetworkCreate) (types.NetworkCreateResponse, error) {
+func (s *NetworkService) Create(ctx context.Context, name string, opts network.CreateOptions) (network.CreateResponse, error) {
 	return cli.NetworkCreate(ctx, name, opts)
 }
 
@@ -335,7 +480,7 @@ func (s *NetworkService) Disconnect(ctx context.Context, networkID, containerID 
 	return cli.NetworkDisconnect(ctx, networkID, containerID, force)
 }
 
-func (s *NetworkService) Prune(ctx context.Context) (types.NetworksPruneReport, error) {
+func (s *NetworkService) Prune(ctx context.Context) (network.PruneReport, error) {
 	return cli.NetworksPrune(ctx, filters.NewArgs())
 }
 
@@ -361,7 +506,7 @@ func (s *VolumeService) Remove(ctx context.Context, name string, force bool) err
 	return cli.VolumeRemove(ctx, name, force)
 }
 
-func (s *VolumeService) Prune(ctx context.Context) (types.VolumesPruneReport, error) {
+func (s *VolumeService) Prune(ctx context.Context) (volume.PruneReport, error) {
 	return cli.VolumesPrune(ctx, filters.NewArgs())
 }
 
@@ -402,3 +547,56 @@ func Context() (context.Context, context.CancelFunc) {
 func ContextWithTimeout(timeout time.Duration) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), timeout)
 }
+
+// queryDockerHubAPI 查询 Docker Hub API 获取镜像 digest
+func (s *ImageService) queryDockerHubAPI(apiURL string) (string, error) {
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("创建请求失败: %v", err)
+	}
+	
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+	
+	// 解析 JSON 响应
+	var tagInfo struct {
+		Images []struct {
+			Digest string `json:"digest"`
+		} `json:"images"`
+	}
+	
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("读取响应失败: %v", err)
+	}
+	
+	if err := json.Unmarshal(body, &tagInfo); err != nil {
+		return "", fmt.Errorf("解析响应失败: %v", err)
+	}
+	
+	// 获取第一个镜像的 digest
+	if len(tagInfo.Images) == 0 {
+		return "", fmt.Errorf("未找到镜像信息")
+	}
+	
+	digest := tagInfo.Images[0].Digest
+	if digest == "" {
+		return "", fmt.Errorf("未获取到 digest")
+	}
+	
+	// 提取 digest hash
+	if strings.Contains(digest, ":") {
+		return strings.SplitN(digest, ":", 2)[1], nil
+	}
+	return digest, nil
+}
+
+// checkUpdateByPull 通过 docker pull 方式检查更新（会下载镜像）

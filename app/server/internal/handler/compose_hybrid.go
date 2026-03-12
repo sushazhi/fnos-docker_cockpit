@@ -6,7 +6,6 @@ import (
     "errors"
     "fmt"
     "io"
-    "log"
     "os"
     "os/exec"
     "path/filepath"
@@ -69,9 +68,7 @@ func (h *ComposeHybridHandler) List(c *gin.Context) {
     projects := make(map[string]*hybridProjectSummary)
 
     runtimeContainers, err := h.listRuntimeContainers("", true)
-    if err != nil {
-        log.Printf("[ComposeHybrid] failed to list runtime compose projects: %v", err)
-    } else {
+    if err == nil {
         for _, ctr := range runtimeContainers {
             project := ctr.Labels[hybridComposeProjectLabel]
             if project == "" {

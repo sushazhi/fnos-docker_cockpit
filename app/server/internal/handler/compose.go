@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -106,7 +105,6 @@ func (h *ComposeHandler) ensureDir() {
 func (h *ComposeHandler) List(c *gin.Context) {
 	h.ensureDir()
 	dir := h.getComposeDir()
-	log.Printf("[Compose] List called, dir: %s", dir)
 
 	type ComposeItem struct {
 		Name     string    `json:"name"`
@@ -127,25 +125,21 @@ func (h *ComposeHandler) List(c *gin.Context) {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err == nil {
-		log.Printf("[Compose] docker compose ls output: %s", out.String())
 		var projects []struct {
 			Name    string `json:"Name"`
 			Status  string `json:"Status"`
 			Config  string `json:"ConfigFiles"`
 		}
 		if err := json.Unmarshal(out.Bytes(), &projects); err == nil {
-			log.Printf("[Compose] Found %d running projects from docker compose ls", len(projects))
 			for _, p := range projects {
-				log.Printf("[Compose] Project: %s, Config: %s", p.Name, p.Config)
 				configFiles := strings.Split(p.Config, ",")
 				if len(configFiles) > 0 {
 					configPath := strings.TrimSpace(configFiles[0])
 					if configPath != "" {
 						info, err := os.Stat(configPath)
-						if err != nil {
-							log.Printf("[Compose] Failed to stat config file %s: %v", configPath, err)
-							continue
-						}
+					if err != nil {
+						continue
+					}
 						projectMap[p.Name] = true
 						
 						// 获取服务数量
@@ -163,11 +157,7 @@ func (h *ComposeHandler) List(c *gin.Context) {
 					}
 				}
 			}
-		} else {
-			log.Printf("[Compose] Failed to parse docker compose ls output: %v", err)
 		}
-	} else {
-		log.Printf("[Compose] docker compose ls failed: %v", err)
 	}
 	cancel()
 
@@ -207,7 +197,6 @@ func (h *ComposeHandler) List(c *gin.Context) {
 		}
 	}
 
-	log.Printf("[Compose] Returning %d projects", len(list))
 	response.Success(c, gin.H{"projects": list})
 }
 

@@ -3,21 +3,28 @@
     <div class="header">
       <span class="header-title">{{ t('settings.title') }}</span>
     </div>
-    
+
     <div class="settings-content">
       <div class="setting-group">
         <div class="group-header">
           <div class="group-icon appearance">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="5"/>
-              <line x1="12" y1="1" x2="12" y2="3"/>
-              <line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1" y1="12" x2="3" y2="12"/>
-              <line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           </div>
           <div class="group-info">
@@ -25,29 +32,37 @@
             <div class="group-desc">{{ t('appearance.desc') }}</div>
           </div>
         </div>
-        
+
         <div class="setting-card">
           <div class="setting-item" @click="toggleTheme">
             <div class="item-left">
               <div class="item-icon theme-icon">
-                <svg v-if="theme === 'light'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="5"/>
-                  <line x1="12" y1="1" x2="12" y2="3"/>
-                  <line x1="12" y1="21" x2="12" y2="23"/>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                  <line x1="1" y1="12" x2="3" y2="12"/>
-                  <line x1="21" y1="12" x2="23" y2="12"/>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                <svg
+                  v-if="theme === 'light'"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                 </svg>
                 <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               </div>
               <div class="item-text">
                 <div class="item-title">{{ t('appearance.darkMode') }}</div>
-                <div class="item-subtitle">{{ theme === 'dark' ? t('appearance.enabled') : t('appearance.disabled') }}</div>
+                <div class="item-subtitle">
+                  {{ theme === 'dark' ? t('appearance.enabled') : t('appearance.disabled') }}
+                </div>
               </div>
             </div>
             <div class="toggle-switch" :class="{ active: theme === 'dark' }">
@@ -56,15 +71,22 @@
           </div>
         </div>
       </div>
-      
+
       <div class="setting-group">
         <div class="group-header">
           <div class="group-icon features">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="7"/>
-              <rect x="14" y="3" width="7" height="7"/>
-              <rect x="14" y="14" width="7" height="7"/>
-              <rect x="3" y="14" width="7" height="7"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
             </svg>
           </div>
           <div class="group-info">
@@ -72,15 +94,24 @@
             <div class="group-desc">{{ t('settings.featuresDesc') }}</div>
           </div>
         </div>
-        
+
         <div class="setting-card">
           <div class="setting-item" @click="$router.push('/networks')">
             <div class="item-left">
               <div class="item-icon network-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="2" y1="12" x2="22" y2="12"/>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                  />
                 </svg>
               </div>
               <div class="item-text">
@@ -89,19 +120,33 @@
               </div>
             </div>
             <div class="item-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </div>
           </div>
-          
+
           <div class="setting-item" @click="$router.push('/system')">
             <div class="item-left">
               <div class="item-icon system-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="16" x2="12" y2="12"/>
-                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
               </div>
               <div class="item-text">
@@ -110,19 +155,33 @@
               </div>
             </div>
             <div class="item-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </div>
           </div>
-          
+
           <div class="setting-item" @click="$router.push('/volumes')">
             <div class="item-left">
               <div class="item-icon volume-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
-                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
                 </svg>
               </div>
               <div class="item-text">
@@ -131,23 +190,37 @@
               </div>
             </div>
             <div class="item-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </div>
           </div>
-          
+
           <div class="setting-item" @click="showRegistryModal = true">
             <div class="item-left">
               <div class="item-icon registry-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <circle cx="12" cy="12" r="4"/>
-                  <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/>
-                  <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>
-                  <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/>
-                  <line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/>
-                  <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="4" />
+                  <line x1="4.93" y1="4.93" x2="9.17" y2="9.17" />
+                  <line x1="14.83" y1="14.83" x2="19.07" y2="19.07" />
+                  <line x1="14.83" y1="9.17" x2="19.07" y2="4.93" />
+                  <line x1="14.83" y1="9.17" x2="18.36" y2="5.64" />
+                  <line x1="4.93" y1="19.07" x2="9.17" y2="14.83" />
                 </svg>
               </div>
               <div class="item-text">
@@ -156,8 +229,15 @@
               </div>
             </div>
             <div class="item-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </div>
           </div>
@@ -165,9 +245,16 @@
           <div v-if="searchAvailable" class="setting-item" @click="showSearchModal = true">
             <div class="item-left">
               <div class="item-icon search-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
               </div>
               <div class="item-text">
@@ -176,8 +263,15 @@
               </div>
             </div>
             <div class="item-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </div>
           </div>
@@ -185,15 +279,21 @@
       </div>
 
       <!-- 只有在搜索功能可用时才显示 -->
-      <div v-if="searchAvailable" class="setting-group">
-      </div>
+      <div v-if="searchAvailable" class="setting-group"></div>
 
       <div class="setting-group">
         <div class="group-header">
           <div class="group-icon account">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </div>
           <div class="group-info">
@@ -201,13 +301,22 @@
             <div class="group-desc">{{ t('settings.accountDesc') }}</div>
           </div>
         </div>
-        
+
         <div class="setting-card">
           <div class="setting-item" @click="showChangePassword = true">
             <div class="item-left">
               <div class="item-icon password-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
+                  />
                 </svg>
               </div>
               <div class="item-text">
@@ -216,21 +325,35 @@
               </div>
             </div>
             <div class="item-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </div>
           </div>
-          
+
           <div class="setting-item" @click="loadAuditLogs">
             <div class="item-left">
               <div class="item-icon audit-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10 9 9 9 8 9"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
                 </svg>
               </div>
               <div class="item-text">
@@ -239,21 +362,35 @@
               </div>
             </div>
             <div class="item-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div class="setting-group">
         <div class="group-header">
           <div class="group-icon about">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
           </div>
           <div class="group-info">
@@ -261,7 +398,7 @@
             <div class="group-desc">{{ t('settings.aboutDesc') }}</div>
           </div>
         </div>
-        
+
         <div class="setting-card">
           <div class="setting-item-static">
             <div class="static-label">{{ t('settings.version') }}</div>
@@ -275,47 +412,79 @@
             <div class="static-label">{{ t('settings.author') }}</div>
             <a href="https://github.com/sushazhi" target="_blank" class="static-link">
               <span>yukihana</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
               </svg>
             </a>
           </div>
           <div class="setting-item-static">
             <div class="static-label">{{ t('settings.repository') }}</div>
-            <a href="https://github.com/sushazhi/fnos-docker_cockpit" target="_blank" class="static-link">
+            <a
+              href="https://github.com/sushazhi/fnos-docker_cockpit"
+              target="_blank"
+              class="static-link"
+            >
               <span>GitHub</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
               </svg>
             </a>
           </div>
         </div>
       </div>
-      
+
       <div class="logout-section">
         <button class="logout-btn" @click="logout">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
           <span>{{ t('settings.signOut') }}</span>
         </button>
       </div>
     </div>
-    
+
     <div v-if="showChangePassword" class="dialog-overlay" @click.self="showChangePassword = false">
       <div class="dialog">
         <div class="dialog-header">
           <h3 class="dialog-title">{{ t('settings.changePassword') }}</h3>
           <button class="dialog-close" @click="showChangePassword = false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -326,7 +495,12 @@
           </div>
           <div class="form-field">
             <label class="form-label">{{ t('settings.newPassword') }}</label>
-            <input type="password" class="form-input" v-model="passwordForm.newPassword" :placeholder="t('settings.passwordHint')" />
+            <input
+              type="password"
+              class="form-input"
+              v-model="passwordForm.newPassword"
+              :placeholder="t('settings.passwordHint')"
+            />
           </div>
           <div class="form-field">
             <label class="form-label">{{ t('settings.confirmPassword') }}</label>
@@ -334,70 +508,115 @@
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn secondary" @click="showChangePassword = false">{{ t('settings.cancel') }}</button>
+          <button class="dialog-btn secondary" @click="showChangePassword = false">
+            {{ t('settings.cancel') }}
+          </button>
           <button class="dialog-btn primary" @click="changePassword" :disabled="changing">
             {{ changing ? t('settings.changing') : t('settings.confirm') }}
           </button>
         </div>
       </div>
     </div>
-    
+
     <div v-if="showAuditLogs" class="dialog-overlay" @click.self="showAuditLogs = false">
       <div class="dialog dialog-large">
         <div class="dialog-header">
           <h3 class="dialog-title">{{ t('settings.auditLogs') }}</h3>
           <button class="dialog-close" @click="showAuditLogs = false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
         <div class="dialog-body audit-body">
           <div v-for="log in auditLogs" :key="log.id" class="audit-item">
             <div class="audit-header">
-              <span class="audit-type" :class="getAuditTypeClass(log.action)">{{ getAuditTypeText(log.action) }}</span>
+              <span class="audit-type" :class="getAuditTypeClass(log.action)">
+                {{ getAuditTypeText(log.action) }}
+              </span>
               <span class="audit-time">{{ formatTime(log.timestamp) }}</span>
             </div>
-            <div class="audit-action">{{ getAuditActionText(log.action, log.details, log.clientIp) }}</div>
+            <div class="audit-action">
+              {{ getAuditActionText(log.action, log.details, log.clientIp) }}
+            </div>
           </div>
           <div v-if="auditLogs.length === 0" class="empty-audit">{{ t('settings.noRecords') }}</div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn primary" @click="showAuditLogs = false">{{ t('settings.close') }}</button>
+          <button class="dialog-btn primary" @click="showAuditLogs = false">
+            {{ t('settings.close') }}
+          </button>
         </div>
       </div>
     </div>
-    
+
     <!-- 镜像加速源设置弹窗 -->
     <div v-if="showRegistryModal" class="dialog-overlay" @click.self="showRegistryModal = false">
       <div class="dialog dialog-large">
         <div class="dialog-header">
           <h3 class="dialog-title">镜像加速源设置</h3>
           <button class="dialog-close" @click="showRegistryModal = false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
         <div class="dialog-body">
           <div class="form-field">
             <label class="form-label">镜像加速地址</label>
-            <input type="text" class="form-input" v-model="registryUrl" placeholder="https://docker.mirrors.ustc.edu.cn" />
-            <div class="form-hint">2026年3月可用加速源：1ms.run、轩辕镜像、Kejilion、DaoCloud 等（★为推荐）</div>
+            <input
+              type="text"
+              class="form-input"
+              v-model="registryUrl"
+              placeholder="https://docker.mirrors.ustc.edu.cn"
+            />
+            <div class="form-hint">
+              2026年3月可用加速源：1ms.run、轩辕镜像、Kejilion、DaoCloud 等（★为推荐）
+            </div>
           </div>
           <div class="registry-presets">
             <div class="preset-label">快速选择（2026年3月更新）：</div>
             <div class="preset-list">
-              <button class="preset-btn" @click="registryUrl = 'https://docker.1ms.run'">1ms.run ★</button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker.xuanyuan.me'">轩辕镜像 ★</button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker.kejilion.pro'">Kejilion</button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker.m.daocloud.io'">DaoCloud</button>
-              <button class="preset-btn" @click="registryUrl = 'https://hub.rat.dev'">Rat Dev</button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker-0.unsee.tech'">Unsee</button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker.1panel.live'">1Panel</button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker-registry.nmqu.com'">NMQU</button>
+              <button class="preset-btn" @click="registryUrl = 'https://docker.1ms.run'">
+                1ms.run ★
+              </button>
+              <button class="preset-btn" @click="registryUrl = 'https://docker.xuanyuan.me'">
+                轩辕镜像 ★
+              </button>
+              <button class="preset-btn" @click="registryUrl = 'https://docker.kejilion.pro'">
+                Kejilion
+              </button>
+              <button class="preset-btn" @click="registryUrl = 'https://docker.m.daocloud.io'">
+                DaoCloud
+              </button>
+              <button class="preset-btn" @click="registryUrl = 'https://hub.rat.dev'">
+                Rat Dev
+              </button>
+              <button class="preset-btn" @click="registryUrl = 'https://docker-0.unsee.tech'">
+                Unsee
+              </button>
+              <button class="preset-btn" @click="registryUrl = 'https://docker.1panel.live'">
+                1Panel
+              </button>
+              <button class="preset-btn" @click="registryUrl = 'https://docker-registry.nmqu.com'">
+                NMQU
+              </button>
             </div>
           </div>
         </div>
@@ -417,8 +636,8 @@
           <h3 class="dialog-title">搜索镜像</h3>
           <button class="dialog-close" @click="closeSearchModal">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -436,8 +655,8 @@
               />
               <button class="search-btn" @click="doSearch" :disabled="searching">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
               </button>
             </div>
@@ -453,16 +672,12 @@
           <div v-else-if="searchResults.length > 0" class="search-results">
             <div class="search-results-title">搜索结果</div>
             <div class="search-results-list">
-              <div
-                v-for="result in searchResults"
-                :key="result.name"
-                class="search-result-item"
-              >
+              <div v-for="result in searchResults" :key="result.name" class="search-result-item">
                 <div class="result-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21 15 16 10 5 21"/>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
                   </svg>
                 </div>
                 <div class="result-content">
@@ -475,9 +690,9 @@
                 </div>
                 <button class="result-download-btn" @click="openDownloadModal(result.name)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                 </button>
               </div>
@@ -485,11 +700,14 @@
           </div>
 
           <!-- 无结果 -->
-          <div v-else-if="hasSearched && !searching && searchResults.length === 0" class="search-empty">
+          <div
+            v-else-if="hasSearched && !searching && searchResults.length === 0"
+            class="search-empty"
+          >
             <div class="empty-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </div>
             <div class="empty-text">未找到相关镜像</div>
@@ -500,7 +718,10 @@
                 <li>镜像加速源不支持搜索功能</li>
                 <li>搜索关键词不准确</li>
               </ul>
-              <p class="hint-tip">💡 提示：您可以直接在"镜像管理"页面手动拉取镜像，输入完整的镜像名称（如：nginx:latest）</p>
+              <p class="hint-tip">
+                💡
+                提示：您可以直接在"镜像管理"页面手动拉取镜像，输入完整的镜像名称（如：nginx:latest）
+              </p>
             </div>
           </div>
         </div>
@@ -515,8 +736,8 @@
         <h3 class="dialog-title">下载镜像</h3>
         <button class="dialog-close" @click="showDownloadModal = false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -542,7 +763,9 @@
             placeholder="latest"
             @keyup.enter="downloadImage"
           />
-          <div class="form-hint" v-if="availableTags.length > 0">共 {{ availableTags.length }} 个标签可选</div>
+          <div class="form-hint" v-if="availableTags.length > 0">
+            共 {{ availableTags.length }} 个标签可选
+          </div>
         </div>
       </div>
       <div class="dialog-footer">
@@ -672,28 +895,28 @@ function formatTime(timestamp) {
 
 // 审计日志类型映射
 const auditTypeMap = {
-  'login_success': { type: 'auth', text: '登录成功' },
-  'login_failed': { type: 'auth', text: '登录失败' },
-  'login_locked': { type: 'auth', text: '账户锁定' },
-  'logout': { type: 'auth', text: '登出' },
-  'password_change': { type: 'auth', text: '密码修改' },
-  'container_start': { type: 'container', text: '容器启动' },
-  'container_stop': { type: 'container', text: '容器停止' },
-  'container_restart': { type: 'container', text: '容器重启' },
-  'container_remove': { type: 'container', text: '容器删除' },
-  'container_create': { type: 'container', text: '容器创建' },
-  'image_pull': { type: 'image', text: '镜像拉取' },
-  'image_remove': { type: 'image', text: '镜像删除' },
-  'image_push': { type: 'image', text: '镜像推送' },
-  'network_create': { type: 'network', text: '网络创建' },
-  'network_remove': { type: 'network', text: '网络删除' },
-  'volume_create': { type: 'volume', text: '存储卷创建' },
-  'volume_remove': { type: 'volume', text: '存储卷删除' },
-  'compose_up': { type: 'compose', text: 'Compose启动' },
-  'compose_down': { type: 'compose', text: 'Compose停止' },
-  'compose_delete': { type: 'compose', text: 'Compose删除' },
-  'file_write': { type: 'file', text: '文件写入' },
-  'file_delete': { type: 'file', text: '文件删除' },
+  login_success: { type: 'auth', text: '登录成功' },
+  login_failed: { type: 'auth', text: '登录失败' },
+  login_locked: { type: 'auth', text: '账户锁定' },
+  logout: { type: 'auth', text: '登出' },
+  password_change: { type: 'auth', text: '密码修改' },
+  container_start: { type: 'container', text: '容器启动' },
+  container_stop: { type: 'container', text: '容器停止' },
+  container_restart: { type: 'container', text: '容器重启' },
+  container_remove: { type: 'container', text: '容器删除' },
+  container_create: { type: 'container', text: '容器创建' },
+  image_pull: { type: 'image', text: '镜像拉取' },
+  image_remove: { type: 'image', text: '镜像删除' },
+  image_push: { type: 'image', text: '镜像推送' },
+  network_create: { type: 'network', text: '网络创建' },
+  network_remove: { type: 'network', text: '网络删除' },
+  volume_create: { type: 'volume', text: '存储卷创建' },
+  volume_remove: { type: 'volume', text: '存储卷删除' },
+  compose_up: { type: 'compose', text: 'Compose启动' },
+  compose_down: { type: 'compose', text: 'Compose停止' },
+  compose_delete: { type: 'compose', text: 'Compose删除' },
+  file_write: { type: 'file', text: '文件写入' },
+  file_delete: { type: 'file', text: '文件删除' }
 }
 
 function getAuditTypeText(action) {
@@ -763,7 +986,7 @@ async function changePassword() {
     showToast(t('settings.passwordMismatch'))
     return
   }
-  
+
   changing.value = true
   try {
     await api.post('/api/change-password', {
@@ -994,7 +1217,7 @@ function closeSearchModal() {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .setting-card {
+[data-theme='dark'] .setting-card {
   box-shadow: none;
 }
 
@@ -1049,27 +1272,27 @@ function closeSearchModal() {
 
 .item-icon.network-icon {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .item-icon.system-icon {
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
 }
 
 .item-icon.compose-icon {
   background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .item-icon.volume-icon {
   background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .item-icon.password-icon {
   background: rgba(250, 42, 45, 0.1);
-  color: #FA2A2D;
+  color: #fa2a2d;
 }
 
 .item-icon.audit-icon {
@@ -1120,7 +1343,7 @@ function closeSearchModal() {
 }
 
 .toggle-switch.active {
-  background: #007DFF;
+  background: #007dff;
 }
 
 .toggle-thumb {
@@ -1166,7 +1389,7 @@ function closeSearchModal() {
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: #007DFF;
+  color: #007dff;
   text-decoration: none;
   padding: 4px 8px;
   margin: -4px -8px;
@@ -1199,7 +1422,7 @@ function closeSearchModal() {
   background: var(--card-bg);
   border: none;
   border-radius: 16px;
-  color: #FA2A2D;
+  color: #fa2a2d;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -1207,7 +1430,7 @@ function closeSearchModal() {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .logout-btn {
+[data-theme='dark'] .logout-btn {
   box-shadow: none;
 }
 
@@ -1240,8 +1463,12 @@ function closeSearchModal() {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .dialog {
@@ -1364,12 +1591,14 @@ function closeSearchModal() {
   color: var(--text-color);
   font-size: 15px;
   font-family: inherit;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -1388,12 +1617,12 @@ function closeSearchModal() {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
 .dialog-btn.primary:hover {
-  background: #0066CC;
+  background: #0066cc;
 }
 
 .dialog-btn.primary:disabled {
@@ -1445,32 +1674,32 @@ function closeSearchModal() {
 
 .audit-type.type-container {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .audit-type.type-image {
   background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .audit-type.type-network {
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
 }
 
 .audit-type.type-volume {
   background: rgba(156, 39, 176, 0.1);
-  color: #9C27B0;
+  color: #9c27b0;
 }
 
 .audit-type.type-compose {
   background: rgba(233, 30, 99, 0.1);
-  color: #E91E63;
+  color: #e91e63;
 }
 
 .audit-type.type-file {
   background: rgba(96, 125, 139, 0.1);
-  color: #607D8B;
+  color: #607d8b;
 }
 
 .audit-type.type-other {
@@ -1498,7 +1727,7 @@ function closeSearchModal() {
 
 .item-icon.registry-icon {
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
 }
 
 .item-icon.search-icon {
@@ -1534,8 +1763,8 @@ function closeSearchModal() {
 }
 
 .preset-btn:hover {
-  background: #007DFF;
-  border-color: #007DFF;
+  background: #007dff;
+  border-color: #007dff;
   color: white;
 }
 
@@ -1560,7 +1789,7 @@ function closeSearchModal() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #007DFF;
+  background: #007dff;
   border: none;
   border-radius: 8px;
   color: white;
@@ -1630,7 +1859,7 @@ function closeSearchModal() {
   justify-content: center;
   background: rgba(0, 125, 255, 0.1);
   border-radius: 8px;
-  color: #007DFF;
+  color: #007dff;
   flex-shrink: 0;
 }
 
@@ -1675,7 +1904,7 @@ function closeSearchModal() {
 
 .result-official {
   padding: 2px 8px;
-  background: #007DFF;
+  background: #007dff;
   color: white;
   border-radius: 4px;
   font-size: 11px;
@@ -1688,7 +1917,7 @@ function closeSearchModal() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #007DFF;
+  background: #007dff;
   border: none;
   border-radius: 8px;
   color: white;
@@ -1698,7 +1927,7 @@ function closeSearchModal() {
 }
 
 .result-download-btn:hover {
-  background: #0066CC;
+  background: #0066cc;
   transform: scale(1.05);
 }
 
@@ -1757,7 +1986,7 @@ function closeSearchModal() {
 }
 
 .search-empty .empty-hint .hint-tip {
-  color: #007DFF;
+  color: #007dff;
   font-weight: 500;
   padding: 8px;
   background: rgba(0, 125, 255, 0.1);
@@ -1769,7 +1998,7 @@ function closeSearchModal() {
   width: 20px;
   height: 20px;
   border: 2px solid var(--border-color);
-  border-top-color: #007DFF;
+  border-top-color: #007dff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -1778,7 +2007,7 @@ function closeSearchModal() {
   width: 16px;
   height: 16px;
   border: 2px solid var(--border-color);
-  border-top-color: #007DFF;
+  border-top-color: #007dff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -1796,6 +2025,8 @@ function closeSearchModal() {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

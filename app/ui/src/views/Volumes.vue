@@ -3,54 +3,60 @@
     <div class="header">
       <button class="header-back" @click="$router.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <span class="header-title">{{ t('volumes.title') }}</span>
       <button class="header-action" @click="refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"/>
-          <polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
       </button>
     </div>
-    
+
     <div class="tabs-container">
       <div class="tabs">
-        <button class="tab" :class="{ active: filter === 'all' }" @click="filter = 'all'">{{ t('volumes.all') }}</button>
-        <button class="tab" :class="{ active: filter === 'used' }" @click="filter = 'used'">{{ t('volumes.used') }}</button>
-        <button class="tab" :class="{ active: filter === 'unused' }" @click="filter = 'unused'">{{ t('volumes.unused') }}</button>
+        <button class="tab" :class="{ active: filter === 'all' }" @click="filter = 'all'">
+          {{ t('volumes.all') }}
+        </button>
+        <button class="tab" :class="{ active: filter === 'used' }" @click="filter = 'used'">
+          {{ t('volumes.used') }}
+        </button>
+        <button class="tab" :class="{ active: filter === 'unused' }" @click="filter = 'unused'">
+          {{ t('volumes.unused') }}
+        </button>
       </div>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <div v-else-if="filteredVolumes.length === 0" class="empty-state">
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <ellipse cx="12" cy="5" rx="9" ry="3"/>
-          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
         </svg>
       </div>
       <div class="empty-text">{{ t('common.noData') }}</div>
     </div>
-    
+
     <div v-else class="list-card">
-      <div 
-        v-for="vol in filteredVolumes" 
-        :key="vol.Name" 
+      <div
+        v-for="vol in filteredVolumes"
+        :key="vol.Name"
         class="list-item"
         @click="showVolumeActions(vol)"
       >
         <div class="item-icon volume-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <ellipse cx="12" cy="5" rx="9" ry="3"/>
-            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            <ellipse cx="12" cy="5" rx="9" ry="3" />
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
           </svg>
         </div>
         <div class="item-content">
@@ -62,25 +68,27 @@
             </span>
           </div>
         </div>
-        <span class="badge" :class="isVolumeUsed(vol) ? 'badge-success' : 'badge-warning'">{{ isVolumeUsed(vol) ? t('volumes.used') : t('volumes.unused') }}</span>
+        <span class="badge" :class="isVolumeUsed(vol) ? 'badge-success' : 'badge-warning'">
+          {{ isVolumeUsed(vol) ? t('volumes.used') : t('volumes.unused') }}
+        </span>
       </div>
     </div>
-    
+
     <button class="fab" @click="showCreateModal = true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
     </button>
-    
+
     <div v-if="showCreateModal" class="dialog-overlay" @click.self="showCreateModal = false">
       <div class="dialog">
         <div class="dialog-header">
           <h3 class="dialog-title">{{ t('volumes.create') }}</h3>
           <button class="dialog-close" @click="showCreateModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -91,28 +99,34 @@
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn secondary" @click="showCreateModal = false">{{ t('common.cancel') }}</button>
-          <button class="dialog-btn primary" @click="createVolume" :disabled="!newVolumeName">{{ t('volumes.create') }}</button>
+          <button class="dialog-btn secondary" @click="showCreateModal = false">
+            {{ t('common.cancel') }}
+          </button>
+          <button class="dialog-btn primary" @click="createVolume" :disabled="!newVolumeName">
+            {{ t('volumes.create') }}
+          </button>
         </div>
       </div>
     </div>
-    
+
     <div v-if="showActions" class="action-sheet-overlay" @click.self="showActions = false">
       <div class="action-sheet">
         <div class="action-sheet-handle"></div>
         <div class="action-sheet-content">
           <button class="sheet-btn danger" @click="confirmRemove">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <polyline points="3 6 5 6 21 6" />
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              />
             </svg>
             {{ t('volumes.remove') }}
           </button>
         </div>
       </div>
     </div>
-    
-    <ConfirmModal 
+
+    <ConfirmModal
       v-if="showConfirm"
       :title="t('volumes.remove')"
       :message="t('common.confirmDelete') + ' ' + selectedVolume?.Name + '?'"
@@ -136,7 +150,7 @@ const showToast = inject('showToast')
 
 const loading = ref(true)
 const volumes = ref([])
-const containers = ref([])
+const _containers = ref([])
 const filter = ref('all')
 const showCreateModal = ref(false)
 const newVolumeName = ref('')
@@ -229,7 +243,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .tabs {
+[data-theme='dark'] .tabs {
   box-shadow: none;
 }
 
@@ -248,7 +262,7 @@ onMounted(() => {
 }
 
 .tab.active {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
@@ -262,12 +276,12 @@ onMounted(() => {
 
 .badge-success {
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
 }
 
 .badge-warning {
   background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .list-card {
@@ -278,7 +292,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .list-card {
+[data-theme='dark'] .list-card {
   box-shadow: none;
 }
 
@@ -320,7 +334,7 @@ onMounted(() => {
 
 .item-icon.volume-icon {
   background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .item-content {
@@ -471,7 +485,7 @@ onMounted(() => {
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -493,7 +507,7 @@ onMounted(() => {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
@@ -560,6 +574,6 @@ onMounted(() => {
 }
 
 .sheet-btn.danger {
-  color: #FA2A2D;
+  color: #fa2a2d;
 }
 </style>

@@ -15,7 +15,7 @@ const i18n: I18n = createI18n({
 })
 
 export function setLocale(locale: string) {
-  (i18n.global.locale as unknown as { value: string }).value = locale
+  ;(i18n.global.locale as unknown as { value: string }).value = locale
   localStorage.setItem('dockpit_locale', locale)
   document.documentElement.setAttribute('lang', locale)
 }

@@ -23,14 +23,17 @@ onMounted(() => {
   }
 })
 
-watch(() => props.message, (val) => {
-  if (val) {
-    visible.value = true
-    setTimeout(() => {
-      visible.value = false
-    }, props.duration)
+watch(
+  () => props.message,
+  val => {
+    if (val) {
+      visible.value = true
+      setTimeout(() => {
+        visible.value = false
+      }, props.duration)
+    }
   }
-})
+)
 </script>
 
 <style scoped>
@@ -51,7 +54,7 @@ watch(() => props.message, (val) => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="dark"] .toast {
+[data-theme='dark'] .toast {
   background: #2a2a2a;
   color: #f0f0f0;
 }
@@ -65,22 +68,22 @@ watch(() => props.message, (val) => {
 }
 
 @keyframes toastIn {
-  from { 
+  from {
     opacity: 0;
     transform: translateX(-50%) translateY(10px);
   }
-  to { 
+  to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
 }
 
 @keyframes toastOut {
-  from { 
+  from {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
-  to { 
+  to {
     opacity: 0;
     transform: translateX(-50%) translateY(10px);
   }

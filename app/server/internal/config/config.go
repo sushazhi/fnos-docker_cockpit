@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -57,8 +56,6 @@ func Init() {
 		}
 	}
 	
-	log.Printf("[Config] DataDir: %s", dataDir)
-	
 	cfg = &Config{
 		Port:          getEnvInt("PORT", 8807),
 		DataDir:       dataDir,
@@ -88,7 +85,6 @@ func Init() {
 	cfg.AuditLogFile = filepath.Join(cfg.DataDir, "audit.log")
 
 	os.MkdirAll(cfg.DataDir, 0755)
-	log.Printf("[Config] Compose dir will be: %s", filepath.Join(cfg.DataDir, "compose"))
 }
 
 func Get() *Config {

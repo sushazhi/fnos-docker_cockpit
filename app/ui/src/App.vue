@@ -2,18 +2,18 @@
   <div v-if="isCheckingAuth" class="auth-loading">
     <div class="spinner"></div>
   </div>
-  
+
   <SetupModal v-else-if="!isInitialized" @setup="handleSetup" />
-  
+
   <LoginModal v-else-if="!isLoggedIn" @success="handleLogin" />
-  
+
   <div v-else class="app-container">
     <router-view />
     <BottomNav />
   </div>
-  
+
   <Toast v-if="toastMessage" :message="toastMessage" />
-  
+
   <!-- 更新通知弹窗 -->
   <UpdateNotification
     :show="showUpdateModal"
@@ -27,9 +27,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, provide, watch } from 'vue'
+import { ref, onMounted, provide } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+// import { useI18n } from 'vue-i18n'
 import api, { setOnSessionExpired } from './services/api'
 import BottomNav from './components/BottomNav.vue'
 import LoginModal from './components/LoginModal.vue'
@@ -38,7 +38,7 @@ import Toast from './components/Toast.vue'
 import UpdateNotification from './components/UpdateNotification.vue'
 import { useUpdateCheck } from './composables/useUpdateCheck'
 
-const { t } = useI18n()
+// const { t } = useI18n()
 const router = useRouter()
 const isLoggedIn = ref(false)
 const isInitialized = ref(false)
@@ -51,7 +51,7 @@ const appVersion = ref('1.0.0')
 const {
   updateInfo,
   showUpdateModal,
-  checkUpdate,
+  // checkUpdate,
   ignoreUpdate,
   closeUpdateModal,
   formatChangelog
@@ -79,7 +79,9 @@ function initTheme() {
 
 function showToast(message, duration = 2000) {
   toastMessage.value = message
-  setTimeout(() => { toastMessage.value = '' }, duration)
+  setTimeout(() => {
+    toastMessage.value = ''
+  }, duration)
 }
 
 provide('showToast', showToast)

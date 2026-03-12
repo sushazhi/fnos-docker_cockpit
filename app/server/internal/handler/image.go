@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/image"
+	dockerregistry "github.com/docker/docker/api/types/registry"
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,7 +47,6 @@ func (h *ImageHandler) List(c *gin.Context) {
 	containers, err := h.containerSrv.List(ctx, true)
 	if err != nil {
 		// 如果获取容器失败，仍然返回镜像列表，只是不计算使用数
-		log.Printf("[镜像列表] 获取容器列表失败: %v", err)
 		response.Success(c, gin.H{"images": images})
 		return
 	}
@@ -224,7 +223,6 @@ func (h *ImageHandler) Pull(c *gin.Context) {
 	}
 
 	outputStr := string(output)
-	log.Printf("[镜像拉取] 拉取输出: %s", outputStr)
 
 	// 检查输出中是否包含错误信息
 	if strings.Contains(outputStr, "error") || strings.Contains(outputStr, "Error") {
@@ -243,9 +241,7 @@ func (h *ImageHandler) Pull(c *gin.Context) {
 
 		// 给拉取的镜像添加纯净标签
 		if err := h.service.Tag(ctx, imageName, cleanTag); err != nil {
-			log.Printf("[镜像拉取] 添加纯净标签失败 %s -> %s: %v", imageName, cleanTag, err)
 		} else {
-			log.Printf("[镜像拉取] 成功添加纯净标签: %s", cleanTag)
 		}
 	}
 
@@ -316,9 +312,7 @@ func (h *ImageHandler) PullStream(c *gin.Context) {
 
 		// 给拉取的镜像添加纯净标签
 		if err := h.service.Tag(ctx, imageName, cleanTag); err != nil {
-			log.Printf("[镜像拉取] 添加纯净标签失败 %s -> %s: %v", imageName, cleanTag, err)
 		} else {
-			log.Printf("[镜像拉取] 成功添加纯净标签: %s", cleanTag)
 		}
 	}
 
@@ -402,14 +396,12 @@ func (h *ImageHandler) CheckSearchAvailable(c *gin.Context) {
 	apiURL := "https://registry.hub.docker.com/v2/repositories/search/?query=test&page_size=1"
 	resp, err := client.Get(apiURL)
 	if err != nil {
-		log.Printf("[镜像搜索检测] Docker Hub不可访问: %v", err)
 		response.Success(c, gin.H{"available": false})
 		return
 	}
 	defer resp.Body.Close()
 
 	available := resp.StatusCode == 200
-	log.Printf("[镜像搜索检测] Docker Hub状态: %d, 可用: %v", resp.StatusCode, available)
 	response.Success(c, gin.H{"available": available})
 }
 
@@ -448,9 +440,8 @@ func (h *ImageHandler) Search(c *gin.Context) {
 		ctx, cancel := docker.ContextWithTimeout(30 * 1000 * 1000000)
 		defer cancel()
 
-		results, err := h.service.Search(ctx, searchTerm, types.ImageSearchOptions{Limit: limit})
+		results, err := h.service.Search(ctx, searchTerm, dockerregistry.SearchOptions{Limit: limit})
 		if err != nil {
-			log.Printf("[镜像搜索] Docker SDK 搜索失败: %v", err)
 			response.DockerError(c, "搜索镜像失败", "搜索服务暂时不可用")
 			return
 		}
@@ -478,7 +469,6 @@ func (h *ImageHandler) Search(c *gin.Context) {
 
 	resp, err := client.Get(apiURL)
 	if err != nil {
-		log.Printf("[镜像搜索] 连接失败: %v", err)
 		response.DockerError(c, "无法连接到Docker Hub", "请检查网络连接或使用代理")
 		return
 	}
@@ -486,14 +476,12 @@ func (h *ImageHandler) Search(c *gin.Context) {
 
 	// 检查响应状态码
 	if resp.StatusCode != 200 {
-		log.Printf("[镜像搜索] HTTP错误 %d", resp.StatusCode)
 		response.DockerError(c, "搜索镜像失败", fmt.Sprintf("HTTP %d", resp.StatusCode))
 		return
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("[镜像搜索] 读取响应失败: %v", err)
 		response.DockerError(c, "读取搜索结果失败", err.Error())
 		return
 	}
@@ -542,12 +530,10 @@ func (h *ImageHandler) Search(c *gin.Context) {
 			// 格式3: 其他可能的格式，尝试通用解析
 			var genericData interface{}
 			if err := json.Unmarshal(body, &genericData); err != nil {
-				log.Printf("[镜像搜索] JSON解析失败: %v", err)
 				response.DockerError(c, "解析搜索结果失败", err.Error())
 				return
 			}
 
-			log.Printf("[镜像搜索] 不支持的响应格式: %T", genericData)
 			response.DockerError(c, "不支持的响应格式", "镜像源返回的数据格式无法识别")
 			return
 		}
@@ -595,11 +581,13 @@ func (h *ImageHandler) CheckUpdate(c *gin.Context) {
 	id := c.Param("id")
 	registry := c.Query("registry") // 从 URL 参数获取加速源
 
+
 	inspect, err := h.service.Inspect(ctx, id)
 	if err != nil {
 		response.DockerError(c, "获取镜像信息失败", err.Error())
 		return
 	}
+
 
 	localImage := ""
 	if len(inspect.RepoTags) > 0 && inspect.RepoTags[0] != "<none>:<none>" {
@@ -612,7 +600,12 @@ func (h *ImageHandler) CheckUpdate(c *gin.Context) {
 	}
 
 	if localImage == "" {
-		response.Success(c, gin.H{"hasUpdate": false, "message": "无法确定镜像名称"})
+		response.Success(c, gin.H{
+			"hasUpdate":   false,
+			"message":     "无法确定镜像名称",
+			"repoTags":    inspect.RepoTags,
+			"repoDigests": inspect.RepoDigests,
+		})
 		return
 	}
 
@@ -631,20 +624,28 @@ func (h *ImageHandler) CheckUpdate(c *gin.Context) {
 		remoteImage = registry + "/" + imageName
 	}
 
-	hasUpdate, newDigest, err := h.service.CheckUpdate(ctx, localImage, remoteImage)
+
+	hasUpdate, newDigest, reason, err := h.service.CheckUpdate(ctx, localImage, remoteImage, inspect.RepoDigests)
 	if err != nil {
 		response.Success(c, gin.H{
-			"hasUpdate":  false,
-			"error":      err.Error(),
-			"localImage": localImage,
+			"hasUpdate":   false,
+			"error":       err.Error(),
+			"reason":      reason,
+			"localImage":  localImage,
+			"remoteImage": remoteImage,
+			"repoDigests": inspect.RepoDigests,
 		})
 		return
 	}
 
+
 	response.Success(c, gin.H{
-		"hasUpdate":  hasUpdate,
-		"newDigest":  newDigest,
-		"localImage": localImage,
+		"hasUpdate":   hasUpdate,
+		"newDigest":   newDigest,
+		"reason":      reason,
+		"localImage":  localImage,
+		"remoteImage": remoteImage,
+		"repoDigests": inspect.RepoDigests,
 	})
 }
 
@@ -752,7 +753,6 @@ func (h *ImageHandler) GetTags(c *gin.Context) {
 			response.Success(c, gin.H{"tags": tags})
 			return
 		}
-		log.Printf("[镜像标签] 从加速源获取失败: %v，尝试 Docker Hub", err)
 	}
 
 	// 尝试 Docker Hub API
@@ -761,14 +761,12 @@ func (h *ImageHandler) GetTags(c *gin.Context) {
 
 	resp, err := client.Get(apiURL)
 	if err != nil {
-		log.Printf("[镜像标签] 获取失败: %v", err)
 		response.DockerError(c, "获取镜像标签失败", "网络连接错误")
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		log.Printf("[镜像标签] HTTP错误 %d", resp.StatusCode)
 		response.DockerError(c, "获取镜像标签失败", fmt.Sprintf("HTTP %d", resp.StatusCode))
 		return
 	}
@@ -937,7 +935,6 @@ func (h *ImageHandler) EditTags(c *gin.Context) {
 				continue
 			}
 			if err := h.service.RemoveTag(ctx, tag); err != nil {
-				log.Printf("[编辑标签] 删除旧标签失败 %s: %v", tag, err)
 			}
 		}
 	}
@@ -999,13 +996,24 @@ func (h *ImageHandler) DetectUpgrade(c *gin.Context) {
 	// 获取镜像加速源
 	registry := c.Query("registry")
 
+	// 首先检查当前镜像是否有更新
+	localImage := imageName + ":" + currentTag
+	remoteImage := localImage
+	if registry != "" {
+		registry = normalizeRegistry(registry)
+		remoteImage = registry + "/" + imageName + ":" + currentTag
+	}
+
+	hasUpdate, newDigest, reason, err := h.service.CheckUpdate(ctx, localImage, remoteImage, inspect.RepoDigests)
+	if err != nil {
+	}
+
 	// 获取所有可用标签
 	var allTags []string
 	if registry != "" {
 		registry = normalizeRegistry(registry)
 		allTags, err = h.getTagsFromRegistry(registry, imageName)
 		if err != nil {
-			log.Printf("[检测升级] 从加速源获取标签失败: %v", err)
 		}
 	}
 
@@ -1064,6 +1072,9 @@ func (h *ImageHandler) DetectUpgrade(c *gin.Context) {
 		"imageName":          imageName,
 		"allTags":            allTags[:min(20, len(allTags))],
 		"upgradableVersions": upgradableVersions,
+		"hasUpdate":          hasUpdate,
+		"newDigest":          newDigest,
+		"updateReason":       reason,
 	})
 }
 

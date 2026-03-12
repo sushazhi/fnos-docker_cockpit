@@ -3,105 +3,124 @@
     <div class="header">
       <button class="header-back" @click="$router.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <span class="header-title">{{ t('compose.title') }}</span>
       <button class="header-action" @click="refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"/>
-          <polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
       </button>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <div v-else-if="projects.length === 0" class="empty-state">
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="8" y1="6" x2="21" y2="6"/>
-          <line x1="8" y1="12" x2="21" y2="12"/>
-          <line x1="8" y1="18" x2="21" y2="18"/>
-          <line x1="3" y1="6" x2="3.01" y2="6"/>
-          <line x1="3" y1="12" x2="3.01" y2="12"/>
-          <line x1="3" y1="18" x2="3.01" y2="18"/>
+          <line x1="8" y1="6" x2="21" y2="6" />
+          <line x1="8" y1="12" x2="21" y2="12" />
+          <line x1="8" y1="18" x2="21" y2="18" />
+          <line x1="3" y1="6" x2="3.01" y2="6" />
+          <line x1="3" y1="12" x2="3.01" y2="12" />
+          <line x1="3" y1="18" x2="3.01" y2="18" />
         </svg>
       </div>
       <div class="empty-text">{{ t('common.noData') }}</div>
     </div>
-    
+
     <div v-else class="list-card">
-      <div 
-        v-for="project in projects" 
-        :key="project.name" 
+      <div
+        v-for="project in projects"
+        :key="project.name"
         class="list-item"
         @click="$router.push(`/compose/${project.name}`)"
       >
         <div class="item-icon compose-icon" :class="{ running: project.status === 'running' }">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="8" y1="6" x2="21" y2="6"/>
-            <line x1="8" y1="12" x2="21" y2="12"/>
-            <line x1="8" y1="18" x2="21" y2="18"/>
-            <line x1="3" y1="6" x2="3.01" y2="6"/>
-            <line x1="3" y1="12" x2="3.01" y2="12"/>
-            <line x1="3" y1="18" x2="3.01" y2="18"/>
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
           </svg>
         </div>
         <div class="item-content">
           <div class="item-title">{{ project.name }}</div>
           <div class="item-subtitle">
-            {{ project.services ?? 0 }} {{ t('compose.services') }} · 
-            <span class="status-text" :class="project.status">{{ getStatusText(project.status) }}</span>
+            {{ project.services ?? 0 }} {{ t('compose.services') }} ·
+            <span class="status-text" :class="project.status">
+              {{ getStatusText(project.status) }}
+            </span>
           </div>
         </div>
         <div class="item-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6"/>
+            <polyline points="9 18 15 12 9 6" />
           </svg>
         </div>
       </div>
     </div>
-    
+
     <button class="fab" @click="showCreateModal = true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
     </button>
-    
+
     <div v-if="showCreateModal" class="dialog-overlay" @click.self="showCreateModal = false">
       <div class="dialog dialog-large">
         <div class="dialog-header">
           <h3 class="dialog-title">{{ t('compose.create') }}</h3>
           <button class="dialog-close" @click="showCreateModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
         <div class="dialog-body">
           <div class="form-field">
             <label class="form-label">{{ t('compose.projectName') }}</label>
-            <input type="text" class="form-input" v-model="newProject.name" placeholder="my-project" />
+            <input
+              type="text"
+              class="form-input"
+              v-model="newProject.name"
+              placeholder="my-project"
+            />
           </div>
           <div class="form-field">
             <label class="form-label">{{ t('compose.composeYaml') }}</label>
-            <textarea class="form-input textarea" v-model="newProject.yaml" placeholder="version: '3'
+            <textarea
+              class="form-input textarea"
+              v-model="newProject.yaml"
+              placeholder="version: '3'
 services:
   web:
     image: nginx
     ports:
-      - '80:80'"></textarea>
+      - '80:80'"
+            ></textarea>
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn secondary" @click="showCreateModal = false">{{ t('common.cancel') }}</button>
-          <button class="dialog-btn primary" @click="createProject" :disabled="creating || !newProject.name">{{ creating ? t('compose.creating') : t('compose.create') }}</button>
+          <button class="dialog-btn secondary" @click="showCreateModal = false">
+            {{ t('common.cancel') }}
+          </button>
+          <button
+            class="dialog-btn primary"
+            @click="createProject"
+            :disabled="creating || !newProject.name"
+          >
+            {{ creating ? t('compose.creating') : t('compose.create') }}
+          </button>
         </div>
       </div>
     </div>
@@ -179,7 +198,7 @@ function getStatusText(status) {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .list-card {
+[data-theme='dark'] .list-card {
   box-shadow: none;
 }
 
@@ -221,12 +240,12 @@ function getStatusText(status) {
 
 .item-icon.compose-icon {
   background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .item-icon.compose-icon.running {
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
 }
 
 .status-text {
@@ -234,7 +253,7 @@ function getStatusText(status) {
 }
 
 .status-text.running {
-  color: #00C853;
+  color: #00c853;
 }
 
 .status-text.stopped {
@@ -396,7 +415,7 @@ function getStatusText(status) {
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -427,7 +446,7 @@ function getStatusText(status) {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 

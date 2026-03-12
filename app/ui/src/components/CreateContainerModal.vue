@@ -5,8 +5,8 @@
         <h3 class="dialog-title">{{ t('containers.create') }}</h3>
         <button class="dialog-close" @click="$emit('close')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -15,7 +15,12 @@
           <div class="section-title">{{ t('containers.basicInfo') }}</div>
           <div class="form-field">
             <label class="form-label">{{ t('containers.name') }}</label>
-            <input type="text" class="form-input" v-model="form.name" :placeholder="t('containers.namePlaceholder')" />
+            <input
+              type="text"
+              class="form-input"
+              v-model="form.name"
+              :placeholder="t('containers.namePlaceholder')"
+            />
           </div>
           <div class="form-field">
             <label class="form-label">{{ t('containers.image') }} *</label>
@@ -42,104 +47,157 @@
             </div>
           </div>
         </div>
-        
+
         <div class="form-section">
           <div class="section-header">
             <div class="section-title">{{ t('containers.ports') }}</div>
             <button class="add-btn" @click="addPort">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </button>
           </div>
           <div class="dynamic-list">
-            <div v-for="(port, index) in form.ports" :key="'port-' + index" class="dynamic-item triple-item">
-              <input type="text" class="form-input" v-model="port.host" :placeholder="t('containers.hostPort')" />
-              <input type="text" class="form-input" v-model="port.container" :placeholder="t('containers.containerPort')" />
+            <div
+              v-for="(port, index) in form.ports"
+              :key="'port-' + index"
+              class="dynamic-item triple-item"
+            >
+              <input
+                type="text"
+                class="form-input"
+                v-model="port.host"
+                :placeholder="t('containers.hostPort')"
+              />
+              <input
+                type="text"
+                class="form-input"
+                v-model="port.container"
+                :placeholder="t('containers.containerPort')"
+              />
               <select class="form-input" v-model="port.protocol">
                 <option value="tcp">TCP</option>
                 <option value="udp">UDP</option>
               </select>
               <button class="remove-btn" @click="removePort(index)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
           </div>
         </div>
-        
+
         <div class="form-section">
           <div class="section-header">
             <div class="section-title">{{ t('containers.volumes') }}</div>
             <button class="add-btn" @click="addVolume">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </button>
           </div>
           <div class="dynamic-list">
-            <div v-for="(vol, index) in form.volumes" :key="'vol-' + index" class="dynamic-item triple-item">
-              <input type="text" class="form-input" v-model="vol.host" :placeholder="t('containers.hostPath')" />
-              <input type="text" class="form-input" v-model="vol.container" :placeholder="t('containers.containerPath')" />
+            <div
+              v-for="(vol, index) in form.volumes"
+              :key="'vol-' + index"
+              class="dynamic-item triple-item"
+            >
+              <input
+                type="text"
+                class="form-input"
+                v-model="vol.host"
+                :placeholder="t('containers.hostPath')"
+              />
+              <input
+                type="text"
+                class="form-input"
+                v-model="vol.container"
+                :placeholder="t('containers.containerPath')"
+              />
               <select class="form-input" v-model="vol.mode">
                 <option value="rw">{{ t('containers.readWrite') }}</option>
                 <option value="ro">{{ t('containers.readOnly') }}</option>
               </select>
               <button class="remove-btn" @click="removeVolume(index)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
           </div>
         </div>
-        
+
         <div class="form-section">
           <div class="section-header">
             <div class="section-title">{{ t('containers.env') }}</div>
             <button class="add-btn" @click="addEnv">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </button>
           </div>
           <div class="dynamic-list">
-            <div v-for="(env, index) in form.envs" :key="'env-' + index" class="dynamic-item env-item">
+            <div
+              v-for="(env, index) in form.envs"
+              :key="'env-' + index"
+              class="dynamic-item env-item"
+            >
               <input type="text" class="form-input env-key" v-model="env.key" placeholder="KEY" />
               <span class="env-equal">=</span>
-              <input type="text" class="form-input env-value" v-model="env.value" placeholder="value" />
+              <input
+                type="text"
+                class="form-input env-value"
+                v-model="env.value"
+                placeholder="value"
+              />
               <button class="remove-btn" @click="removeEnv(index)" v-if="form.envs.length > 1">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
           </div>
         </div>
-        
+
         <div class="form-section collapsible" :class="{ expanded: showAdvanced }">
           <div class="section-header clickable" @click="showAdvanced = !showAdvanced">
             <div class="section-title">{{ t('containers.advancedOptions') }}</div>
-            <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"/>
+            <svg
+              class="expand-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="6 9 12 15 18 9" />
             </svg>
           </div>
           <div class="advanced-content" v-if="showAdvanced">
             <div class="form-field">
               <label class="form-label">{{ t('containers.cmd') }}</label>
-              <input type="text" class="form-input" v-model="form.cmd" placeholder="nginx -g 'daemon off;'" />
+              <input
+                type="text"
+                class="form-input"
+                v-model="form.cmd"
+                placeholder="nginx -g 'daemon off;'"
+              />
               <div class="form-hint">{{ t('containers.cmdHint') }}</div>
             </div>
             <div class="form-field">
               <label class="form-label">{{ t('containers.entrypoint') }}</label>
-              <input type="text" class="form-input" v-model="form.entrypoint" placeholder="/docker-entrypoint.sh" />
+              <input
+                type="text"
+                class="form-input"
+                v-model="form.entrypoint"
+                placeholder="/docker-entrypoint.sh"
+              />
               <div class="form-hint">{{ t('containers.entrypointHint') }}</div>
             </div>
             <div class="form-field">
@@ -148,11 +206,21 @@
             </div>
             <div class="form-field">
               <label class="form-label">{{ t('containers.user') }}</label>
-              <input type="text" class="form-input" v-model="form.user" placeholder="root 或 1000:1000" />
+              <input
+                type="text"
+                class="form-input"
+                v-model="form.user"
+                placeholder="root 或 1000:1000"
+              />
             </div>
             <div class="form-field">
               <label class="form-label">{{ t('containers.hostname') }}</label>
-              <input type="text" class="form-input" v-model="form.hostname" placeholder="my-container" />
+              <input
+                type="text"
+                class="form-input"
+                v-model="form.hostname"
+                placeholder="my-container"
+              />
             </div>
             <div class="form-row">
               <div class="form-field half">
@@ -178,14 +246,20 @@
                 <label class="form-label">{{ t('containers.memoryLimit') }}</label>
                 <button class="auto-set-btn" @click="autoSetMemory" type="button">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="23 4 23 10 17 10"/>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    <polyline points="23 4 23 10 17 10" />
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                   </svg>
                   自动设置
                 </button>
               </div>
               <div class="input-group">
-                <input type="number" class="form-input" v-model.number="form.memory" placeholder="512" min="0" />
+                <input
+                  type="number"
+                  class="form-input"
+                  v-model.number="form.memory"
+                  placeholder="512"
+                  min="0"
+                />
                 <select class="form-input unit-select" v-model="form.memoryUnit">
                   <option value="m">MB</option>
                   <option value="g">GB</option>
@@ -197,20 +271,33 @@
                 <label class="form-label">{{ t('containers.cpuLimit') }}</label>
                 <button class="auto-set-btn" @click="autoSetCPU" type="button">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="23 4 23 10 17 10"/>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    <polyline points="23 4 23 10 17 10" />
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                   </svg>
                   自动设置
                 </button>
               </div>
-              <input type="number" class="form-input" v-model.number="form.cpuShares" placeholder="1024" min="0" step="1" />
+              <input
+                type="number"
+                class="form-input"
+                v-model.number="form.cpuShares"
+                placeholder="1024"
+                min="0"
+                step="1"
+              />
               <div class="form-hint">{{ t('containers.cpuLimitHint') }}</div>
             </div>
             <div class="form-field">
               <div class="checkbox-item" @click="form.privileged = !form.privileged">
                 <div class="checkbox" :class="{ checked: form.privileged }">
-                  <svg v-if="form.privileged" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"/>
+                  <svg
+                    v-if="form.privileged"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
                 <span class="checkbox-label">{{ t('containers.privileged') }}</span>
@@ -220,8 +307,14 @@
             <div class="form-field">
               <div class="checkbox-item" @click="form.autoRemove = !form.autoRemove">
                 <div class="checkbox" :class="{ checked: form.autoRemove }">
-                  <svg v-if="form.autoRemove" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"/>
+                  <svg
+                    v-if="form.autoRemove"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
                 <span class="checkbox-label">{{ t('containers.autoRemove') }}</span>
@@ -231,8 +324,14 @@
             <div class="form-field">
               <div class="checkbox-item" @click="form.interactive = !form.interactive">
                 <div class="checkbox" :class="{ checked: form.interactive }">
-                  <svg v-if="form.interactive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"/>
+                  <svg
+                    v-if="form.interactive"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
                 <span class="checkbox-label">{{ t('containers.interactive') }}</span>
@@ -241,8 +340,14 @@
             <div class="form-field">
               <div class="checkbox-item" @click="form.tty = !form.tty">
                 <div class="checkbox" :class="{ checked: form.tty }">
-                  <svg v-if="form.tty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"/>
+                  <svg
+                    v-if="form.tty"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
                 <span class="checkbox-label">{{ t('containers.tty') }}</span>
@@ -252,7 +357,9 @@
         </div>
       </div>
       <div class="dialog-footer">
-        <button class="dialog-btn secondary" @click="$emit('close')">{{ t('common.cancel') }}</button>
+        <button class="dialog-btn secondary" @click="$emit('close')">
+          {{ t('common.cancel') }}
+        </button>
         <button class="dialog-btn primary" @click="create" :disabled="creating || !form.image">
           {{ creating ? t('containers.creating') : t('containers.create') }}
         </button>
@@ -408,7 +515,10 @@ async function autoSetMemory() {
     const totalMemory = data.info?.MemTotal || 0
     if (totalMemory > 0) {
       // 设置为总内存的 1/4，最小 512MB，最大 8GB
-      const suggestedMemory = Math.min(Math.max(Math.floor(totalMemory / 1024 / 1024 / 4), 512), 8192)
+      const suggestedMemory = Math.min(
+        Math.max(Math.floor(totalMemory / 1024 / 1024 / 4), 512),
+        8192
+      )
       if (suggestedMemory >= 1024) {
         form.value.memory = Math.floor(suggestedMemory / 1024)
         form.value.memoryUnit = 'g'
@@ -492,9 +602,7 @@ async function create() {
       body.volumes = volumes
     }
 
-    const envs = form.value.envs
-      .filter(e => e.key.trim())
-      .map(e => `${e.key.trim()}=${e.value}`)
+    const envs = form.value.envs.filter(e => e.key.trim()).map(e => `${e.key.trim()}=${e.value}`)
     if (envs.length > 0) {
       body.env = envs
     }
@@ -716,12 +824,14 @@ async function create() {
   color: var(--text-color);
   font-size: 14px;
   font-family: inherit;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -757,7 +867,7 @@ async function create() {
   background: rgba(0, 125, 255, 0.1);
   border: none;
   border-radius: 8px;
-  color: #007DFF;
+  color: #007dff;
   cursor: pointer;
   transition: background var(--transition-fast);
 }
@@ -813,7 +923,7 @@ async function create() {
   background: rgba(250, 42, 45, 0.1);
   border: none;
   border-radius: 8px;
-  color: #FA2A2D;
+  color: #fa2a2d;
   cursor: pointer;
   flex-shrink: 0;
   transition: background var(--transition-fast);
@@ -871,8 +981,8 @@ async function create() {
 }
 
 .checkbox.checked {
-  background: #007DFF;
-  border-color: #007DFF;
+  background: #007dff;
+  border-color: #007dff;
 }
 
 .checkbox svg {
@@ -906,12 +1016,12 @@ async function create() {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
 .dialog-btn.primary:hover {
-  background: #0066CC;
+  background: #0066cc;
 }
 
 .dialog-btn.primary:disabled {
@@ -943,7 +1053,7 @@ async function create() {
   background: rgba(0, 125, 255, 0.1);
   border: none;
   border-radius: 6px;
-  color: #007DFF;
+  color: #007dff;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;

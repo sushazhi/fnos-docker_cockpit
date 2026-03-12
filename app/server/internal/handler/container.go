@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
@@ -469,7 +468,7 @@ func (h *ContainerHandler) Exec(c *gin.Context) {
 		return
 	}
 
-	execConfig := types.ExecConfig{
+	execConfig := container.ExecOptions{
 		AttachStdout: true,
 		AttachStderr: true,
 		Cmd:          req.Cmd,
@@ -481,7 +480,7 @@ func (h *ContainerHandler) Exec(c *gin.Context) {
 		return
 	}
 
-	attachResp, err := h.service.ExecAttach(ctx, execResp.ID, types.ExecStartCheck{})
+	attachResp, err := h.service.ExecAttach(ctx, execResp.ID, container.ExecAttachOptions{})
 	if err != nil {
 		response.DockerError(c, "执行命令失败", err.Error())
 		return
@@ -521,7 +520,7 @@ func (h *ContainerHandler) ExecCreate(c *gin.Context) {
 		return
 	}
 
-	execConfig := types.ExecConfig{
+	execConfig := container.ExecOptions{
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -609,7 +608,7 @@ func (h *ContainerHandler) ExecWrite(c *gin.Context) {
 	}
 
 	cli := docker.GetClient()
-	conn, err := cli.ContainerExecAttach(ctx, execID, types.ExecStartCheck{Tty: true})
+	conn, err := cli.ContainerExecAttach(ctx, execID, container.ExecAttachOptions{Tty: true})
 	if err != nil {
 		response.DockerError(c, "连接终端失败", err.Error())
 		return
@@ -628,7 +627,7 @@ func (h *ContainerHandler) ExecRead(c *gin.Context) {
 	execID := c.Param("execId")
 
 	cli := docker.GetClient()
-	conn, err := cli.ContainerExecAttach(ctx, execID, types.ExecStartCheck{Tty: true})
+	conn, err := cli.ContainerExecAttach(ctx, execID, container.ExecAttachOptions{Tty: true})
 	if err != nil {
 		response.DockerError(c, "连接终端失败", err.Error())
 		return
@@ -666,7 +665,7 @@ func (h *ContainerHandler) ExecWebSocket(c *gin.Context) {
 	cli := docker.GetClient()
 
 	// 立即连接到 exec，这会启动 shell 进程
-	execConn, err := cli.ContainerExecAttach(ctx, execID, types.ExecStartCheck{Tty: true})
+	execConn, err := cli.ContainerExecAttach(ctx, execID, container.ExecAttachOptions{Tty: true})
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

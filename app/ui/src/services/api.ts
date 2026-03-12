@@ -51,7 +51,9 @@ export async function fetchCSRFToken(): Promise<string | null> {
     const response = await fetch(`${API_BASE}/api/csrf-token`, { credentials: 'include' })
     if (response.ok) {
       const result: ApiResponse = await response.json()
-      const csrfToken = (result.data as Record<string, unknown>)?.csrfToken as string || result.csrfToken as string
+      const csrfToken =
+        ((result.data as Record<string, unknown>)?.csrfToken as string) ||
+        (result.csrfToken as string)
       if (csrfToken) {
         setCSRFToken(csrfToken)
         return csrfToken
@@ -75,24 +77,24 @@ async function request<T = unknown>(endpoint: string, options: RequestOptions = 
   const method = options.method || 'GET'
   const needCSRF = method === 'POST' || method === 'PUT' || method === 'DELETE'
   const skipCSRF = NO_CSRF_ENDPOINTS.includes(endpoint)
-  
+
   if (needCSRF && !skipCSRF && !CSRF_TOKEN) {
     await fetchCSRFToken()
   }
-  
+
   if (needCSRF && !skipCSRF && CSRF_TOKEN) {
     headers['X-CSRF-Token'] = CSRF_TOKEN
   }
-  
+
   const response = await fetch(url, { ...options, headers, credentials: 'include' })
-  
+
   if (!response.ok) {
     const errorData: ApiResponse = await response.json().catch(() => ({}))
     const errorMessage = errorData.error || errorData.Error || '请求失败'
     const error = new Error(errorMessage) as ApiError
     error.code = errorData.code
     error.status = response.status
-    
+
     if (response.status === 401) {
       clearCSRFToken()
       // 会话过期，通知应用显示登录界面
@@ -100,7 +102,10 @@ async function request<T = unknown>(endpoint: string, options: RequestOptions = 
         onSessionExpiredCallback()
       }
     }
-    if (response.status === 403 && (errorData.error === 'CSRF验证失败' || errorData.code === 'CSRF_ERROR')) {
+    if (
+      response.status === 403 &&
+      (errorData.error === 'CSRF验证失败' || errorData.code === 'CSRF_ERROR')
+    ) {
       clearCSRFToken()
       const newCSRFToken = await fetchCSRFToken()
       if (newCSRFToken) {
@@ -108,17 +113,19 @@ async function request<T = unknown>(endpoint: string, options: RequestOptions = 
         const retryResponse = await fetch(url, { ...options, headers, credentials: 'include' })
         if (retryResponse.ok) {
           const retryResult: ApiResponse = await retryResponse.json()
-          return retryResult.data as T || retryResult as T
+          return (retryResult.data as T) || (retryResult as T)
         }
         const retryErrorData: ApiResponse = await retryResponse.json().catch(() => ({}))
-        const retryError = new Error(retryErrorData.error || retryErrorData.Error || `HTTP ${retryResponse.status}`) as ApiError
+        const retryError = new Error(
+          retryErrorData.error || retryErrorData.Error || `HTTP ${retryResponse.status}`
+        ) as ApiError
         retryError.code = retryErrorData.code
         throw retryError
       }
     }
     throw error
   }
-  
+
   const result: ApiResponse = await response.json()
   return (result.data || result) as T
 }

@@ -3,78 +3,84 @@
     <div class="header">
       <button class="header-back" @click="$router.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <span class="header-title">{{ t('networks.title') }}</span>
       <button class="header-action" @click="refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"/>
-          <polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
       </button>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
-    
+
     <div v-else-if="networks.length === 0" class="empty-state">
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="2" y1="12" x2="22" y2="12"/>
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path
+            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+          />
         </svg>
       </div>
       <div class="empty-text">{{ t('common.noData') }}</div>
     </div>
-    
+
     <div v-else class="list-card">
-      <div 
-        v-for="net in networks" 
-        :key="net.Id" 
-        class="list-item"
-        @click="showNetworkDetail(net)"
-      >
+      <div v-for="net in networks" :key="net.Id" class="list-item" @click="showNetworkDetail(net)">
         <div class="item-icon network-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="2" y1="12" x2="22" y2="12"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path
+              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            />
           </svg>
         </div>
         <div class="item-content">
           <div class="item-title">{{ net.Name }}</div>
-          <div class="item-subtitle">{{ net.Driver }} · {{ getContainerCount(net) }} {{ t('networks.containers') }}</div>
+          <div class="item-subtitle">
+            {{ net.Driver }} · {{ getContainerCount(net) }} {{ t('networks.containers') }}
+          </div>
         </div>
         <span class="badge" :class="getScopeClass(net.Scope)">{{ net.Scope }}</span>
       </div>
     </div>
-    
+
     <button class="fab" @click="showCreateModal = true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
     </button>
-    
+
     <div v-if="showCreateModal" class="dialog-overlay" @click.self="showCreateModal = false">
       <div class="dialog">
         <div class="dialog-header">
           <h3 class="dialog-title">{{ t('networks.create') }}</h3>
           <button class="dialog-close" @click="showCreateModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
         <div class="dialog-body">
           <div class="form-field">
             <label class="form-label">{{ t('networks.name') }}</label>
-            <input type="text" class="form-input" v-model="newNetworkName" placeholder="my-network" />
+            <input
+              type="text"
+              class="form-input"
+              v-model="newNetworkName"
+              placeholder="my-network"
+            />
           </div>
           <div class="form-field">
             <label class="form-label">{{ t('networks.driver') }}</label>
@@ -86,20 +92,24 @@
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn secondary" @click="showCreateModal = false">{{ t('common.cancel') }}</button>
-          <button class="dialog-btn primary" @click="createNetwork" :disabled="!newNetworkName">{{ t('networks.create') }}</button>
+          <button class="dialog-btn secondary" @click="showCreateModal = false">
+            {{ t('common.cancel') }}
+          </button>
+          <button class="dialog-btn primary" @click="createNetwork" :disabled="!newNetworkName">
+            {{ t('networks.create') }}
+          </button>
         </div>
       </div>
     </div>
-    
+
     <div v-if="showDetailModal" class="dialog-overlay" @click.self="showDetailModal = false">
       <div class="dialog dialog-large">
         <div class="dialog-header">
           <h3 class="dialog-title">{{ selectedNetwork?.Name }}</h3>
           <button class="dialog-close" @click="showDetailModal = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -118,27 +128,36 @@
               <span class="detail-value">{{ networkDetail.IPAM.Config[0].Subnet }}</span>
             </div>
           </div>
-          
+
           <div class="containers-section">
             <div class="section-title">{{ t('networks.connectedContainers') }}</div>
             <div v-if="connectedContainers.length === 0" class="empty-containers">
               {{ t('networks.noContainers') }}
             </div>
             <div v-else class="container-list">
-              <div v-for="container in connectedContainers" :key="container.EndpointID" class="container-item" @click="goToContainer(container.ContainerId)">
+              <div
+                v-for="container in connectedContainers"
+                :key="container.EndpointID"
+                class="container-item"
+                @click="goToContainer(container.ContainerId)"
+              >
                 <div class="container-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                   </svg>
                 </div>
                 <div class="container-info">
-                  <div class="container-name">{{ container.Name || container.ContainerId?.substring(0, 12) }}</div>
-                  <div class="container-ip" v-if="container.IPv4Address">IP: {{ container.IPv4Address }}</div>
+                  <div class="container-name">
+                    {{ container.Name || container.ContainerId?.substring(0, 12) }}
+                  </div>
+                  <div class="container-ip" v-if="container.IPv4Address">
+                    IP: {{ container.IPv4Address }}
+                  </div>
                 </div>
                 <div class="container-arrow">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 18 15 12 9 6"/>
+                    <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
               </div>
@@ -146,13 +165,17 @@
           </div>
         </div>
         <div class="dialog-footer">
-          <button class="dialog-btn danger" @click="confirmRemove" v-if="canDelete">{{ t('networks.remove') }}</button>
-          <button class="dialog-btn primary" @click="showDetailModal = false">{{ t('common.close') }}</button>
+          <button class="dialog-btn danger" @click="confirmRemove" v-if="canDelete">
+            {{ t('networks.remove') }}
+          </button>
+          <button class="dialog-btn primary" @click="showDetailModal = false">
+            {{ t('common.close') }}
+          </button>
         </div>
       </div>
     </div>
-    
-    <ConfirmModal 
+
+    <ConfirmModal
       v-if="showConfirm"
       :title="t('networks.remove')"
       :message="t('common.confirmDelete') + ' ' + selectedNetwork?.Name + '?'"
@@ -208,9 +231,12 @@ function getContainerCount(net) {
 
 function getScopeClass(scope) {
   switch (scope) {
-    case 'local': return 'badge-info'
-    case 'swarm': return 'badge-success'
-    default: return 'badge-info'
+    case 'local':
+      return 'badge-info'
+    case 'swarm':
+      return 'badge-success'
+    default:
+      return 'badge-info'
   }
 }
 
@@ -229,7 +255,7 @@ async function refresh() {
 async function showNetworkDetail(net) {
   selectedNetwork.value = net
   showDetailModal.value = true
-  
+
   try {
     const data = await api.get(`/api/network/${net.Id}`)
     networkDetail.value = data.info
@@ -290,7 +316,7 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .list-card {
+[data-theme='dark'] .list-card {
   box-shadow: none;
 }
 
@@ -332,7 +358,7 @@ onMounted(() => {
 
 .item-icon.network-icon {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .item-content {
@@ -365,12 +391,12 @@ onMounted(() => {
 
 .badge-info {
   background: rgba(0, 125, 255, 0.1);
-  color: #007DFF;
+  color: #007dff;
 }
 
 .badge-success {
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
 }
 
 .empty-state {
@@ -493,7 +519,7 @@ onMounted(() => {
 
 .form-input:focus {
   outline: none;
-  border-color: #007DFF;
+  border-color: #007dff;
   box-shadow: 0 0 0 3px rgba(0, 125, 255, 0.12);
 }
 
@@ -515,7 +541,7 @@ onMounted(() => {
 }
 
 .dialog-btn.primary {
-  background: #007DFF;
+  background: #007dff;
   color: white;
 }
 
@@ -531,7 +557,7 @@ onMounted(() => {
 
 .dialog-btn.danger {
   background: rgba(250, 42, 45, 0.1);
-  color: #FA2A2D;
+  color: #fa2a2d;
 }
 
 .detail-section {
@@ -603,7 +629,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background: rgba(0, 200, 83, 0.1);
-  color: #00C853;
+  color: #00c853;
   border-radius: 10px;
   margin-right: 12px;
   flex-shrink: 0;
