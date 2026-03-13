@@ -6,6 +6,7 @@ export default {
     cancel: '取消',
     confirm: '确认',
     close: '关闭',
+    clear: '清除',
     noData: '暂无数据',
     viewAll: '查看全部',
     more: '更多',
@@ -13,7 +14,8 @@ export default {
     confirmDelete: '确定要删除',
     copy: '复制',
     copied: '已复制',
-    copyFailed: '复制失败'
+    copyFailed: '复制失败',
+    error: '错误'
   },
   nav: {
     home: '概览',
@@ -46,6 +48,7 @@ export default {
     all: '全部',
     running: '运行中',
     stopped: '已停止',
+    selected: '已选择 {count} 个容器',
     state: {
       running: '运行中',
       paused: '已暂停',
@@ -62,6 +65,15 @@ export default {
       remove: '删除',
       rename: '重命名',
       edit: '编辑'
+    },
+    batch: {
+      confirm: {
+        start: '确定要启动选中的 {count} 个容器吗？',
+        stop: '确定要停止选中的 {count} 个容器吗？',
+        restart: '确定要重启选中的 {count} 个容器吗？',
+        remove: '确定要删除选中的 {count} 个容器吗？此操作不可恢复！'
+      },
+      success: '批量操作完成：成功 {success} 个，失败 {failed} 个'
     },
     create: '创建容器',
     name: '容器名称',

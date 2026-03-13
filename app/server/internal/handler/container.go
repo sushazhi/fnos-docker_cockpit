@@ -769,3 +769,75 @@ func SearchContainers(c *gin.Context) {
 
 	response.Success(c, gin.H{"containers": containers})
 }
+
+// BatchOperation 批量操作容器
+func (h *ContainerHandler) BatchOperation(c *gin.Context) {
+	var req model.BatchOperationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "参数错误: "+err.Error())
+		return
+	}
+
+	if len(req.IDs) == 0 {
+		response.BadRequest(c, "容器ID列表不能为空")
+		return
+	}
+
+	if len(req.IDs) > 50 {
+		response.BadRequest(c, "批量操作最多支持50个容器")
+		return
+	}
+
+	result := model.BatchOperationResult{
+		Success: []string{},
+		Failed:  []model.BatchOperationError{},
+	}
+
+	timeout := req.Timeout
+	if timeout == 0 {
+		timeout = 10
+	}
+
+	for _, id := range req.IDs {
+		ctx, cancel := docker.Context()
+		var err error
+
+		switch req.Operation {
+		case "start":
+			err = h.service.Start(ctx, id)
+		case "stop":
+			err = h.service.Stop(ctx, id, &timeout)
+		case "restart":
+			err = h.service.Restart(ctx, id, &timeout)
+		case "pause":
+			err = h.service.Pause(ctx, id)
+		case "unpause":
+			err = h.service.Unpause(ctx, id)
+		case "remove":
+			err = h.service.Remove(ctx, id, req.Force, false)
+		default:
+			cancel()
+			response.BadRequest(c, "不支持的操作: "+req.Operation)
+			return
+		}
+
+		cancel()
+
+		if err != nil {
+			result.Failed = append(result.Failed, model.BatchOperationError{
+				ID:    id,
+				Error: err.Error(),
+			})
+		} else {
+			result.Success = append(result.Success, id)
+		}
+	}
+
+	addAuditLog(c, "container_batch_"+req.Operation, map[string]interface{}{
+		"ids":     req.IDs,
+		"success": len(result.Success),
+		"failed":  len(result.Failed),
+	})
+
+	response.Success(c, result)
+}

@@ -110,15 +110,13 @@
       </div>
     </div>
 
-    <!-- 底部操作按钮组 -->
-    <div class="fab-container">
-      <button class="fab" @click="showPullModal = true" :title="t('images.pull')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
-    </div>
+    <!-- 底部操作按钮 -->
+    <button class="fab" @click="showPullModal = true" :title="t('images.pull')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+    </button>
 
     <!-- 拉取镜像模态框 -->
     <div v-if="showPullModal" class="dialog-overlay" @click.self="showPullModal = false">
@@ -1441,48 +1439,6 @@ onMounted(() => {
 
 .sheet-btn.update {
   color: #28a745;
-}
-
-/* 底部按钮组 */
-.fab-container {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  display: flex;
-  gap: 12px;
-  z-index: 100;
-}
-
-.fab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  background: #007dff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 125, 255, 0.3);
-  transition: all 0.2s;
-}
-
-.fab:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 125, 255, 0.4);
-}
-
-.fab:active {
-  transform: translateY(0);
-}
-
-.fab svg {
-  width: 20px;
-  height: 20px;
 }
 
 /* 进度条样式 */

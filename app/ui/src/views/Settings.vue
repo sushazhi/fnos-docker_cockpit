@@ -584,38 +584,26 @@
               type="text"
               class="form-input"
               v-model="registryUrl"
-              placeholder="https://docker.mirrors.ustc.edu.cn"
+              placeholder="https://docker.1ms.run"
             />
             <div class="form-hint">
-              2026年3月可用加速源：1ms.run、轩辕镜像、Kejilion、DaoCloud 等（★为推荐）
+              推荐使用：1ms.run（毫秒）、轩辕镜像、1Panel、DaoCloud
             </div>
           </div>
           <div class="registry-presets">
-            <div class="preset-label">快速选择（2026年3月更新）：</div>
+            <div class="preset-label">快速选择：</div>
             <div class="preset-list">
               <button class="preset-btn" @click="registryUrl = 'https://docker.1ms.run'">
-                1ms.run ★
+                毫秒 (1ms.run)
               </button>
               <button class="preset-btn" @click="registryUrl = 'https://docker.xuanyuan.me'">
-                轩辕镜像 ★
-              </button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker.kejilion.pro'">
-                Kejilion
-              </button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker.m.daocloud.io'">
-                DaoCloud
-              </button>
-              <button class="preset-btn" @click="registryUrl = 'https://hub.rat.dev'">
-                Rat Dev
-              </button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker-0.unsee.tech'">
-                Unsee
+                轩辕镜像
               </button>
               <button class="preset-btn" @click="registryUrl = 'https://docker.1panel.live'">
                 1Panel
               </button>
-              <button class="preset-btn" @click="registryUrl = 'https://docker-registry.nmqu.com'">
-                NMQU
+              <button class="preset-btn" @click="registryUrl = 'https://docker.m.daocloud.io'">
+                DaoCloud
               </button>
             </div>
           </div>

@@ -1125,33 +1125,72 @@ function escapeShellArg(arg) {
 // 复制 Docker Run 命令到剪贴板
 async function copyDockerRun() {
   try {
-    // 优先使用现代 Clipboard API
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(dockerRunCommand.value)
-    } else {
-      // Fallback: 使用传统方法
-      const textarea = document.createElement('textarea')
-      textarea.value = dockerRunCommand.value
-      textarea.style.position = 'fixed'
-      textarea.style.left = '-9999px'
-      textarea.style.top = '-9999px'
-      document.body.appendChild(textarea)
-      textarea.focus()
-      textarea.select()
-      const successful = document.execCommand('copy')
-      document.body.removeChild(textarea)
-      if (!successful) {
-        throw new Error('execCommand copy failed')
+    const textToCopy = dockerRunCommand.value
+    
+    if (!textToCopy) {
+      throw new Error('No content to copy')
+    }
+
+    // 方法1: 尝试使用现代 Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(textToCopy)
+        dockerRunCopied.value = true
+        showToast(t('common.copied'))
+        setTimeout(() => {
+          dockerRunCopied.value = false
+        }, 2000)
+        return
+      } catch (clipboardError) {
+        console.warn('Clipboard API failed, trying fallback:', clipboardError)
       }
     }
-    dockerRunCopied.value = true
-    showToast(t('common.copied'))
-    setTimeout(() => {
-      dockerRunCopied.value = false
-    }, 2000)
+
+    // 方法2: Fallback - 使用 textarea 方法
+    const textarea = document.createElement('textarea')
+    textarea.value = textToCopy
+    // 确保 textarea 可见但在视口外
+    textarea.style.position = 'fixed'
+    textarea.style.top = '0'
+    textarea.style.left = '0'
+    textarea.style.width = '2em'
+    textarea.style.height = '2em'
+    textarea.style.padding = '0'
+    textarea.style.border = 'none'
+    textarea.style.outline = 'none'
+    textarea.style.boxShadow = 'none'
+    textarea.style.background = 'transparent'
+    textarea.setAttribute('readonly', '')
+    
+    document.body.appendChild(textarea)
+    
+    // 选择文本
+    textarea.select()
+    textarea.setSelectionRange(0, textToCopy.length)
+    
+    // 尝试复制
+    let successful = false
+    try {
+      successful = document.execCommand('copy')
+    } catch (execError) {
+      console.error('execCommand failed:', execError)
+    }
+    
+    document.body.removeChild(textarea)
+    
+    if (successful) {
+      dockerRunCopied.value = true
+      showToast(t('common.copied'))
+      setTimeout(() => {
+        dockerRunCopied.value = false
+      }, 2000)
+    } else {
+      throw new Error('All copy methods failed')
+    }
   } catch (e) {
     console.error('Copy failed:', e)
     showToast(t('common.copyFailed'))
+    dockerRunCopied.value = false
   }
 }
 

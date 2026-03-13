@@ -18,6 +18,7 @@
     "@xterm/xterm": "^6.0.0",
     "ansi-to-html": "^0.7.2",
     "dompurify": "^3.2.4",
+    "pinia": "^3.0.4",
     "vue": "^3.4.0",
     "vue-i18n": "^9.14.5",
     "vue-router": "^4.3.0"

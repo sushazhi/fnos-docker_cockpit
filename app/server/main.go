@@ -16,7 +16,7 @@ func main() {
 	config.Init()
 
 	if err := docker.Init(); err != nil {
-		log.Printf("璀﹀憡: Docker杩炴帴澶辫触: %v", err)
+		log.Printf("警告: Docker连接失败: %v", err)
 	}
 
 	service.InitSessionService()
@@ -64,6 +64,7 @@ func main() {
 		api.GET("/csrf-token", auth.GetCSRFToken)
 
 		api.GET("/containers", containers.List)
+		api.POST("/containers/batch", middleware.CSRFRequired(), containers.BatchOperation)
 		api.GET("/container/:id", containers.Get)
 		api.GET("/container/:id/stats", containers.Stats)
 		api.GET("/container/:id/logs", containers.Logs)

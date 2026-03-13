@@ -680,7 +680,7 @@ select.field-input {
   right: 20px;
   width: 56px;
   height: 56px;
-  border-radius: var(--radius-lg);
+  border-radius: 50%;
   background: var(--accent-color);
   color: white;
   border: none;
