@@ -671,8 +671,19 @@ let _prevNetworkRx = ref(0)
 let _prevNetworkTx = ref(0)
 let _prevNetworkTime = ref(0)
 let logsInterval = null
+let isVisible = true
 
 const containerId = route.params.id
+
+function handleVisibilityChange() {
+  isVisible = !document.hidden
+  if (isVisible && tab.value === 'logs') {
+    startLogsAutoRefresh()
+    loadLogs(false)
+  } else {
+    stopLogsAutoRefresh()
+  }
+}
 
 const ansiConverter = new AnsiToHtml({
   fg: '#d4d4d4',
@@ -1570,7 +1581,7 @@ function startLogsAutoRefresh() {
     if (tab.value === 'logs' && !logsLoading.value) {
       loadLogs(false) // 自动刷新时不显示 loading，避免界面跳动
     }
-  }, 3000)
+  }, 5000)
 }
 
 function stopLogsAutoRefresh() {
@@ -1586,10 +1597,12 @@ onMounted(() => {
     loadLogs(true) // 初始加载时显示 loading
     startLogsAutoRefresh()
   }
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
   stopLogsAutoRefresh()
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 // 打开编辑模态框

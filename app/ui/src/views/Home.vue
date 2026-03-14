@@ -213,6 +213,29 @@ const hostMemory = ref({ total: 0, used: 0, available: 0 })
 const runningContainers = ref([])
 const containerStats = ref({})
 let statsInterval = null
+let isVisible = true
+
+function startPolling() {
+  if (statsInterval) return
+  statsInterval = setInterval(loadContainerStats, 5000)
+}
+
+function stopPolling() {
+  if (statsInterval) {
+    clearInterval(statsInterval)
+    statsInterval = null
+  }
+}
+
+function handleVisibilityChange() {
+  isVisible = !document.hidden
+  if (isVisible) {
+    startPolling()
+    loadContainerStats()
+  } else {
+    stopPolling()
+  }
+}
 
 // 计算总CPU占用
 const totalCpuUsage = computed(() => {
@@ -376,14 +399,13 @@ async function refresh() {
 
 onMounted(() => {
   refresh()
-  statsInterval = setInterval(loadContainerStats, 2000)
+  startPolling()
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
-  if (statsInterval) {
-    clearInterval(statsInterval)
-    statsInterval = null
-  }
+  stopPolling()
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 

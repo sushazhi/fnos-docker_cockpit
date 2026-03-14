@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -12,17 +13,26 @@ import (
 	"dockpit/internal/model"
 )
 
+const (
+	maxAuditLogSize  = 10 * 1024 * 1024 // 10MB 后轮转
+	maxAuditLogFiles = 3                // 保留3个历史文件
+)
+
 type AuditService struct {
-	logs []model.AuditLog
-	mu   sync.RWMutex
-	file *os.File
+	logs        []model.AuditLog
+	mu          sync.RWMutex
+	file        *os.File
+	currentSize int64
+	filePath    string
 }
 
 var auditService *AuditService
 
 func InitAuditService() {
+	cfg := config.Get()
 	auditService = &AuditService{
-		logs: make([]model.AuditLog, 0, config.Get().Audit.MaxLogs),
+		logs:     make([]model.AuditLog, 0, cfg.Audit.MaxLogs),
+		filePath: cfg.AuditLogFile,
 	}
 	auditService.loadFromFile()
 }
@@ -70,8 +80,13 @@ func (s *AuditService) GetLogs(limit int) []model.AuditLog {
 }
 
 func (s *AuditService) writeToFile(log model.AuditLog) {
+	// 检查是否需要轮转
+	if s.currentSize >= maxAuditLogSize {
+		s.rotateFile()
+	}
+
 	if s.file == nil {
-		f, err := os.OpenFile(config.Get().AuditLogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		f, err := os.OpenFile(s.filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			return
 		}
@@ -79,11 +94,41 @@ func (s *AuditService) writeToFile(log model.AuditLog) {
 	}
 
 	data, _ := json.Marshal(log)
-	s.file.WriteString(string(data) + "\n")
+	line := string(data) + "\n"
+	s.file.WriteString(line)
+	s.currentSize += int64(len(line))
+}
+
+func (s *AuditService) rotateFile() {
+	if s.file != nil {
+		s.file.Close()
+		s.file = nil
+	}
+
+	// 删除最老的文件
+	oldest := fmt.Sprintf("%s.%d", s.filePath, maxAuditLogFiles)
+	os.Remove(oldest)
+
+	// 重命名现有备份文件
+	for i := maxAuditLogFiles - 1; i >= 1; i-- {
+		oldPath := fmt.Sprintf("%s.%d", s.filePath, i)
+		newPath := fmt.Sprintf("%s.%d", s.filePath, i+1)
+		os.Rename(oldPath, newPath)
+	}
+
+	// 重命名当前日志文件
+	os.Rename(s.filePath, fmt.Sprintf("%s.1", s.filePath))
+
+	s.currentSize = 0
 }
 
 func (s *AuditService) loadFromFile() {
-	f, err := os.Open(config.Get().AuditLogFile)
+	// 获取文件大小
+	if stat, err := os.Stat(s.filePath); err == nil {
+		s.currentSize = stat.Size()
+	}
+
+	f, err := os.Open(s.filePath)
 	if err != nil {
 		return
 	}

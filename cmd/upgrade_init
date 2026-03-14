@@ -1,20 +1,10 @@
 #!/bin/bash
-BACKUP="${wizard_backup_before_upgrade:-true}"
-DATA_DIR="${DPANEL_DATA_DIR:-/vol1/@appdata/dockpit}"
+# 升级前停止服务
 
-if [ "$BACKUP" = "true" ]; then
-    BACKUP_DIR="/tmp/dockpit_backup_$(date +%Y%m%d_%H%M%S)"
-    
-    if ! mkdir -p "$BACKUP_DIR"; then
-        echo "Error: Failed to create backup directory $BACKUP_DIR" > "$TRIM_TEMP_LOGFILE"
-        exit 1
-    fi
-    
-    if [ -d "$DATA_DIR" ]; then
-        if ! cp -r "$DATA_DIR"/* "$BACKUP_DIR/" 2>/dev/null; then
-            echo "Warning: Some files could not be backed up, continuing upgrade..."
-        fi
-    fi
+MAIN_SCRIPT="/var/apps/dockpit/cmd/main"
+
+if [ -x "$MAIN_SCRIPT" ]; then
+    "$MAIN_SCRIPT" stop
 fi
 
 exit 0

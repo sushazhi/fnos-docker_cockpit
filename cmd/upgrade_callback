@@ -1,8 +1,12 @@
 #!/bin/bash
+# 升级后启动服务
 
-if ! systemctl restart dockpit 2>/dev/null; then
-    echo "Error: Failed to restart dockpit service" > "$TRIM_TEMP_LOGFILE"
-    exit 1
+MAIN_SCRIPT="/var/apps/dockpit/cmd/main"
+
+if [ -x "$MAIN_SCRIPT" ]; then
+    "$MAIN_SCRIPT" start
+    exit $?
 fi
 
-exit 0
+echo "Error: Main script not found" > "$TRIM_TEMP_LOGFILE"
+exit 1
